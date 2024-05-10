@@ -1,0 +1,10 @@
+name: actions
+description: "Collection of actions"
+author: EnsonoAactions
+branding:
+  color: gray-dark
+  icon: git-pull-request
+runs:
+  using: node20
+  # this may be just
+  main: index.js

@@ -23,7 +23,7 @@ jobs:
         echo ${{ steps.flattenedJson.outputs.complex2Level__key1__c2l_key1 }}
         echo ${{ steps.flattenedJson.outputs.complex2Level_arr__key1__c2larr_key1 }}
 
-    - uses: ensono/actions/tasks/process-json
+    - uses: ensono/actions/tasks/process-json@v0.2.1
       id: publishedJson
       with: 
         separator: "__"
