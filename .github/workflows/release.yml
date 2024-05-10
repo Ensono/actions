@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+permissions: 
+  repository-projects: write
+
 jobs:
   set-version:
     runs-on: ubuntu-latest
