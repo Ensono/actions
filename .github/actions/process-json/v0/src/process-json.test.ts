@@ -12,7 +12,7 @@ describe("process json", () => {
     let mockGetInput: jest.SpyInstance<string, [name: string, options?: mockSrv.InputOptions], any>
     let mockGetBooleanInput: jest.SpyInstance<boolean, [name: string, options?: mockSrv.InputOptions], any>
     let mockSetVariable: jest.SpyInstance<void, [name: string, val: any], any>
-    // let mockSetResult: jest.SpyInstance<void, [result: mockSrv.TaskResult, message: string, done?: boolean | undefined], any> 
+    let mockSetFailed: jest.SpyInstance<void, [message: string | Error], any>
     
     beforeEach(() => {
         mockDebug = jest.spyOn(mockSrv, "debug").mockImplementation(() => {})
@@ -20,7 +20,7 @@ describe("process json", () => {
         mockGetInput = jest.spyOn(mockSrv, 'getInput')
         mockGetBooleanInput = jest.spyOn(mockSrv, 'getBooleanInput')
         mockSetVariable = jest.spyOn(mockSrv, 'exportVariable').mockImplementation(() => {})
-        // mockSetResult = jest.spyOn(mockSrv, 'setResult').mockImplementation(() => {})
+        mockSetFailed = jest.spyOn(mockSrv, 'setFailed').mockImplementation(() => {})
     })
 
     afterEach(async () => {
@@ -97,8 +97,8 @@ describe("process json", () => {
         expect(mockGetInput).toHaveBeenNthCalledWith(1, "separator", {"required": false, "trimWhitespace": true});
         expect(mockGetInput).toHaveBeenNthCalledWith(2, "jsonStringOrPath", {"required": true});
         // should error on above
-        // expect(mockSetResult).toHaveBeenCalledTimes(1)
-        // expect(mockSetResult).toHaveBeenCalledWith(2, "Unable to parse jsonStringOrPath input. Not a valid JSON string.", true)
+        expect(mockSetFailed).toHaveBeenCalledTimes(1)
+        expect(mockSetFailed).toHaveBeenCalledWith("Unable to parse jsonStringOrPath input. Not a valid JSON string.")
         expect(mockError).toHaveBeenCalled()
         expect(mockError).toHaveBeenCalledTimes(1)
         // expect(mockDebug).toHaveBeenCalledTimes(0)
@@ -116,6 +116,7 @@ describe("process json", () => {
             // Arrange
             let deferDelete: () => Promise<void>
             mockGetInput.mockReturnValueOnce('__')
+
             if (isString){
                 mockGetInput.mockReturnValueOnce(tfInput)
                 deferDelete = async () => {}
