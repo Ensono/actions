@@ -1,4 +1,4 @@
-name: 'Process JSON'
+name: 'processJSON'
 description: |
   Processes JSON input of string or path to file.
 
@@ -22,9 +22,7 @@ inputs:
       Indicates whether or not to mark all outputs as secrets. This value is ignored for terraform outputs and the sensitive flag is respected.
     required: false
     default: 'false'
-outputs:
-  processed: # id of output
-    description: 'outputs of the flattened JSON'
+
 runs:
   using: 'node20'
   main: 'task.js'

@@ -24,7 +24,7 @@ jobs:
       - name: Run Test
         run: |
           pnpm i
-          pnpm run test || echo "pnpm bug \"¯\_(ツ)_/¯\""
+          pnpm run test || echo "tests emit failures \"¯\_(ツ)_/¯\""
           pnpm run test:merge
 
       - name: Publish Junit style Test Report
