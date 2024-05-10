@@ -1,4 +1,4 @@
-const root = require("../../../jest.config")
+const root = require("../../jest.config")
 
 module.exports = {
   ...root,

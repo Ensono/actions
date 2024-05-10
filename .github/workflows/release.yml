@@ -40,4 +40,3 @@ jobs:
           echo "MAJOR -> v${{ env.GitVersion_Major }}"
           git tag -a v${{ env.GitVersion_SemVer }} -m "ci tag release semver" $GITHUB_SHA
           git push origin v${{ env.GitVersion_SemVer }}
-

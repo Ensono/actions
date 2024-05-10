@@ -12,22 +12,22 @@ jobs:
     env: {}       
     steps:
     - uses: actions/checkout@v4
-    - uses: ./.github/actions/process-json/v0
+    - uses: ./tasks/process-json/v0
       id: flattenedJson
       with: 
         separator: "__"
-        jsonStringOrPath: .github/actions/process-json/v0/.tests/sample-output.json
+        jsonStringOrPath: tasks/process-json/.tests/sample-output.json
         isTerraformOutput: true
     - run: |
         env
         echo ${{ steps.flattenedJson.outputs.complex2Level__key1__c2l_key1 }}
         echo ${{ steps.flattenedJson.outputs.complex2Level_arr__key1__c2larr_key1 }}
 
-    - uses: ensono/actions/processJson@v0
+    - uses: ensono/actions/tasks/process-json
       id: publishedJson
       with: 
         separator: "__"
-        jsonStringOrPath: .github/actions/process-json/v0/.tests/sample-output.json
+        jsonStringOrPath: tasks/process-json/.tests/sample-output.json
         isTerraformOutput: true
     - run: |
         env
