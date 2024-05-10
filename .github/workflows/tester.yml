@@ -10,6 +10,8 @@ jobs:
   process-json: 
     runs-on: ubuntu-latest
     env: {}       
+    outputs:
+      complex2Level__key1__c2l_key1: ${{ steps.flattenedJson.outputs.complex2Level__key1__c2l_key1 }}
     steps:
     - uses: actions/checkout@v4
     - uses: ./tasks/process-json
