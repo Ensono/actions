@@ -5,8 +5,8 @@ on:
     branches:
       - main
 
-permissions: 
-  repository-projects: write
+permissions:
+  contents: write
 
 jobs:
   set-version:
