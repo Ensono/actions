@@ -33,3 +33,12 @@ jobs:
         env
         echo ${{ steps.publishedJson.outputs.complex2Level__key1__c2l_key1 }}
         echo ${{ steps.publishedJson.outputs.complex2Level_arr__key1__c2larr_key1 }}
+
+  across-jobs:
+    needs: 
+      - process-json
+    runs-on: ubuntu-latest
+    steps:
+      - name: output across jobs test
+        run: |
+          echo ${{ needs.process-json.complex2Level__key1__c2l_key1 }}
