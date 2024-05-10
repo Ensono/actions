@@ -44,4 +44,4 @@ jobs:
       - uses: actions/checkout@v4
       - name: output across jobs
         run: |
-          echo "complex2Level__key1__c2l_key1: ${{ needs.process-json.complex2Level__key1__c2l_key1 }}"
+          echo "complex2Level__key1__c2l_key1: ${{ needs.process-json.outputs.complex2Level__key1__c2l_key1 }}"
