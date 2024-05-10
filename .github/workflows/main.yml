@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     env: {}       
     steps:
-    - uses: ./.github/actions/process-json/v0
+    - uses: .github/actions/process-json/v0
       id: outputProcessor
       with: 
         separator: "__"
