@@ -1,0 +1,16 @@
+{
+  "name": "@ensono-task/process-json-output",
+  "version": "1.0.0",
+  "description": "This action takes any JSON input and ",
+  "main": "index.js",
+  "scripts": {
+    "test": "../../../../node_modules/.bin/jest -c jest.config.js --coverage",
+    "test:watch": "../../../../node_modules/.bin/jest --coverage -c jest.config.js --watchAll",
+    "build": "../../../../node_modules/.bin/tsc --noEmit --skipLibCheck && ../../../../node_modules/.bin/esbuild --bundle ./src/index.ts --outfile=task.js --banner:js='// Generated Code\n// Needs to be checked in' --platform=node --format=cjs",
+    "echo": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "devDependencies": {},
+  "license": "MIT"
+}

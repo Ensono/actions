@@ -1,0 +1,54 @@
+# MISC
+# any local only resources can go in here 
+local/
+
+# TF
+.terraform
+terraform.tfvars
+terraform.tfstate.d
+.tfplan
+terraform.tfstate
+terraform.tfstate.backup
+.terraform.tfstate.lock.info
+.tfoutput
+
+# outputs
+bin/
+debug/
+out/
+obj/
+*.zip
+# tests
+.coverage
+.combined-raw.json
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+dev-dist
+
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Env
+.env
+

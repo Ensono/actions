@@ -1,0 +1,22 @@
+name: tester 
+
+on:
+  push: 
+    branches:
+    - main
+
+jobs:
+  process-json: 
+    runs-on: ubuntu-latest
+    env: {}       
+    steps:
+    - uses: ./.github/actions/process-json/v0
+      id: outputProcessor
+      with: 
+        separator: "__"
+        jsonStringOrPath: .github/actions/process-json/v0/.tests/sample-output.json
+        isTerraformOutput: true
+    - run: |
+        env
+        echo ${{ steps.outputProcessor.outputs.complex2Level__key1__c2l_key1 }}
+        echo ${{ toJson(steps.outputProcessor) }}
