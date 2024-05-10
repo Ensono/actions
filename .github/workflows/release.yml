@@ -36,8 +36,8 @@ jobs:
           echo "VERSION -> v${{ env.GitVersion_SemVer }}"
           echo "MAJOR -> v${{ env.GitVersion_Major }}"
 
-          # git tag -a v$v${{ env.GitVersion_SemVer }} -m "ci tag release semver" $GITHUB_SHA
-          # git tag -a v${{ env.GitVersion_Major }} -m "ci tag release major" $GITHUB_SHA
-          # git push origin v${{ env.GitVersion_SemVer }}
-          # git push origin v${{ env.GitVersion_Major }} || echo "already tagged at major"
+          git tag -a v$v${{ env.GitVersion_SemVer }} -m "ci tag release semver" $GITHUB_SHA
+          git tag -a v${{ env.GitVersion_Major }} -m "ci tag release major" $GITHUB_SHA
+          git push origin v${{ env.GitVersion_SemVer }}
+          git push origin v${{ env.GitVersion_Major }} || echo "already tagged at major"
 
