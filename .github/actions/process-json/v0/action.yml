@@ -22,7 +22,10 @@ inputs:
       Indicates whether or not to mark all outputs as secrets. This value is ignored for terraform outputs and the sensitive flag is respected.
     required: false
     default: 'false'
-
+outputs:
+  flattenedJson:
+    description: Outputs flattened JSON under this step ID
+    
 runs:
   using: 'node20'
   main: 'task.js'

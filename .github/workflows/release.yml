@@ -1,0 +1,39 @@
+name: release 
+
+on: 
+  push:
+    branches:
+      - main
+
+jobs:
+  set-version:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/dotnet/sdk:6.0 
+    outputs:
+      semVer: ${{ steps.gitversion.outputs.semVer }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: install deps
+        run: |
+          apt-get update && apt-get install -y jq git
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.email ${{ github.actor }}-ci@gha.org
+          git config user.name ${{ github.actor }}
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v1.1.1
+        with:
+          versionSpec: '5.x'
+      - name: Set SemVer Version
+        uses: gittools/actions/gitversion/execute@v1.1.1
+        id: gitversion
+
+      - name: Set Version
+        run: |
+          echo "REVISION  -> $GITHUB_SHA"
+          echo "VERSION -> v$GITVERSION_SEMVER"
+          git tag -a "v$GITVERSION_SEMVER" -m "ci tag release uistrategy" $GITHUB_SHA
+          git push origin "v$GITVERSION_SEMVER"
+
