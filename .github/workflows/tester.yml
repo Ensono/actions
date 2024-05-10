@@ -14,16 +14,16 @@ jobs:
       complex2Level__key1__c2l_key1: ${{ steps.flattenedJson.outputs.complex2Level__key1__c2l_key1 }}
     steps:
     - uses: actions/checkout@v4
-    - uses: ./tasks/process-json
-      id: flattenedJson
-      with: 
-        separator: "__"
-        jsonStringOrPath: tasks/process-json/.tests/sample-output.json
-        isTerraformOutput: true
-    - run: |
-        env
-        echo ${{ steps.flattenedJson.outputs.complex2Level__key1__c2l_key1 }}
-        echo ${{ steps.flattenedJson.outputs.complex2Level_arr__key1__c2larr_key1 }}
+    # - uses: ./tasks/process-json
+    #   id: flattenedJson
+    #   with: 
+    #     separator: "__"
+    #     jsonStringOrPath: tasks/process-json/.tests/sample-output.json
+    #     isTerraformOutput: true
+    # - run: |
+    #     env
+    #     echo ${{ steps.flattenedJson.outputs.complex2Level__key1__c2l_key1 }}
+    #     echo ${{ steps.flattenedJson.outputs.complex2Level_arr__key1__c2larr_key1 }}
 
     - uses: ensono/actions/tasks/process-json@v0.2.1
       id: publishedJson
@@ -31,10 +31,11 @@ jobs:
         separator: "__"
         jsonStringOrPath: tasks/process-json/.tests/sample-output.json
         isTerraformOutput: true
-    - run: |
+    - name: test within the job 
+      run: |
         env
-        echo ${{ steps.publishedJson.outputs.complex2Level__key1__c2l_key1 }}
-        echo ${{ steps.publishedJson.outputs.complex2Level_arr__key1__c2larr_key1 }}
+        echo "complex2Level__key1__c2l_key1: ${{ steps.publishedJson.outputs.complex2Level__key1__c2l_key1 }}"
+        echo "complex2Level_arr__key1__c2larr_key1: ${{ steps.publishedJson.outputs.complex2Level_arr__key1__c2larr_key1 }}"
 
   across-jobs:
     needs: 
