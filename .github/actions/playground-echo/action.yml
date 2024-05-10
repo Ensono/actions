@@ -1,0 +1,21 @@
+name: 'playgroundEcho'
+description: |
+  Playground Echo
+inputs:
+  input1:  # id of input
+    description: 'Sample Input as string'
+    required: true
+    default: ''
+  input2StrArrComma:
+    description: |
+      String comma separated to be processed by 
+    required: true
+  inputBool:
+    description: |
+      Sample bool input
+    required: false
+    default: 'false'
+
+runs:
+  using: 'node20'
+  main: 'task.js'

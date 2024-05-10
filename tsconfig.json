@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "baseUrl": "<rootDir>/src",
+        "outDir": "<rootDir>/dist",
+        "esModuleInterop": true,
+        "declaration": true
+    },
+    "exclude": [
+        "node_modules",
+        "**/dist/**/*",
+        "**/*.test.ts"
+    ]
+}

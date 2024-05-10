@@ -1,0 +1,24 @@
+name: tester 
+
+on:
+  push: 
+    branches:
+    - main
+    - feat/*
+
+jobs:
+  process-json: 
+    runs-on: ubuntu-latest
+    env: {}       
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/process-json/v0
+      id: flattenedJson
+      with: 
+        separator: "__"
+        jsonStringOrPath: .github/actions/process-json/v0/.tests/sample-output.json
+        isTerraformOutput: true
+    - run: |
+        env
+        echo ${{ steps.flattenedJson.outputs.complex2Level__key1__c2l_key1 }}
+        echo ${{ steps.flattenedJson.outputs.complex2Level_arr__key1__c2larr_key1 }}
