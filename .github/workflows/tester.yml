@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     env: {}       
     outputs:
-      complex2Level__key1__c2l_key1: ${{ steps.flattenedJson.outputs.complex2Level__key1__c2l_key1 }}
+      complex2Level__key1__c2l_key1: ${{ steps.publishedJson.outputs.complex2Level__key1__c2l_key1 }}
     steps:
     - uses: actions/checkout@v4
     # - uses: ./tasks/process-json
@@ -33,7 +33,6 @@ jobs:
         isTerraformOutput: true
     - name: test within the job 
       run: |
-        env
         echo "complex2Level__key1__c2l_key1: ${{ steps.publishedJson.outputs.complex2Level__key1__c2l_key1 }}"
         echo "complex2Level_arr__key1__c2larr_key1: ${{ steps.publishedJson.outputs.complex2Level_arr__key1__c2larr_key1 }}"
 
@@ -42,6 +41,7 @@ jobs:
       - process-json
     runs-on: ubuntu-latest
     steps:
-      - name: output across jobs test
+      - uses: actions/checkout@v4
+      - name: output across jobs
         run: |
-          echo ${{ needs.process-json.complex2Level__key1__c2l_key1 }}
+          echo "complex2Level__key1__c2l_key1: ${{ needs.process-json.complex2Level__key1__c2l_key1 }}"
