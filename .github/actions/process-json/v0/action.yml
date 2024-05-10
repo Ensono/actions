@@ -16,10 +16,12 @@ inputs:
     description: |
       Indicates whether or not the JSON string is of Terraform output format
     required: false
+    default: 'false'
   markAllOutputAsSecret:
     description: |
       Indicates whether or not to mark all outputs as secrets. This value is ignored for terraform outputs and the sensitive flag is respected.
     required: false
+    default: 'false'
 outputs:
   processed: # id of output
     description: 'outputs of the flattened JSON'
