@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: ./.github/actions/process-json/v0
-      # id: outputProcessor
+      id: flattenedJson
       with: 
         separator: "__"
         jsonStringOrPath: .github/actions/process-json/v0/.tests/sample-output.json

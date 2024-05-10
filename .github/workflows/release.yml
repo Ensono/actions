@@ -34,6 +34,8 @@ jobs:
         run: |
           echo "REVISION  -> $GITHUB_SHA"
           echo "VERSION -> v$GITVERSION_SEMVER"
-          git tag -a "v$GITVERSION_SEMVER" -m "ci tag release uistrategy" $GITHUB_SHA
-          git push origin "v$GITVERSION_SEMVER"
+          git tag -a v$GITVERSION_SEMVER -m "ci tag release semver" $GITHUB_SHA
+          git tag -a v$GITVERSION_MAJOR -m "ci tag release major" $GITHUB_SHA
+          git push origin v$GITVERSION_SEMVER
+          git push origin v$GITVERSION_MAJOR
 
