@@ -4,9 +4,9 @@ on:
   push:
     branches:
       - main
+      - feat/test-write
 
-permissions: 
-  repository-projects: write
+permissions: write-all  
 
 jobs:
   set-version:
