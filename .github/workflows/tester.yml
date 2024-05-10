@@ -12,7 +12,7 @@ jobs:
     env: {}       
     steps:
     - uses: actions/checkout@v4
-    - uses: ./tasks/process-json/v0
+    - uses: ./tasks/process-json
       id: flattenedJson
       with: 
         separator: "__"
