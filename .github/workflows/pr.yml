@@ -1,0 +1,23 @@
+name: PR workflow
+
+on:
+  pull_request: 
+    branches: 
+      - main
+
+jobs:
+  actions-builder:
+    name: Build and test all actions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Run Test
+        run: |
+          pnpm i
+          pnpm run test
