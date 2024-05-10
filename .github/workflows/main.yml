@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     env: {}       
     steps:
+    - uses: actions/checkout
     - uses: ./.github/actions/process-json/v0
       id: outputProcessor
       with: 
