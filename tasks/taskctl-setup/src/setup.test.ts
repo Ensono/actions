@@ -30,7 +30,7 @@ describe("setup succeeds", () => {
         mockGetInput.mockReturnValueOnce(".taskctl")
         // isTF
         mockGetBooleanInput.mockReturnValueOnce(false)
-        let tmpRunnerDir = env.TMPDIR
+        let tmpRunnerDir = env.RUNNER_TEMP || env.TMPDIR
         env.RUNNER_TEMP = tmpRunnerDir
         let err = null
         // Act 
