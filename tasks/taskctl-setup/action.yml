@@ -1,0 +1,23 @@
+name: 'taskctl-setup'
+description: |
+  Sets up taskctl binary. 
+
+  Allows for version specification.
+
+inputs:
+  version: 
+    description: Version of the binary to download.
+    required: false 
+    default: latest
+  isPrerelease:
+    description: Look for version in prerelease section
+    required: false
+    default: 'false'
+  downloadDir:
+    description: Download directory for the executable 
+    default: ".taskctl"
+    required: false
+
+runs:
+  using: 'node20'
+  main: 'task.js'

@@ -1,8 +1,8 @@
 /**
- * Process Nested JSON Action
+ * Setup taskctl Action
  *
  */
 /* istanbul ignore next */ 
-import { runAction } from "./process-json"
+import { runAction } from "./setup"
 /* istanbul ignore next */ 
 runAction()
