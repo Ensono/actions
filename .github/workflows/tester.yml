@@ -18,7 +18,7 @@ jobs:
       id: publishedJson
       with: 
         separator: "__"
-        jsonStringOrPath: actions/process-json/.tests/sample-output.json
+        jsonStringOrPath: process-json/.tests/sample-output.json
         isTerraformOutput: true
     - name: test within the job 
       run: |
@@ -30,7 +30,7 @@ jobs:
       steps:
         - uses: actions/checkout@v4
         # - uses: ensono/actions/taskctl-setup@main
-        - uses: ./actions/taskctl-setup
+        - uses: ./taskctl-setup
           id: taskctlsetup
           with: 
             version: latest
