@@ -51,7 +51,7 @@ pnpm run build
 ## Current tasks
 
 - process-json
-
+- taskctl-setup
 
 ## Adding a Task
 
@@ -63,11 +63,11 @@ An Example is left in the .github/actions folder under `.github/actions/playgrou
 
 ### Step 1
 
-Firstly create a folder inside `.github/actions` e.g. `.github/actions/my-awesome-foo`
+Firstly create a folder inside the root of the repo e.g. `my-awesome-foo`, this will be where your task lives.
 
 ```bash
-mkdir -p .github/actions/my-awesome-foo && cd .github/actions/my-awesome-foo
-pnpm init -y --scope=@ensono-task --name=my-awesome-foo
+mkdir -p my-awesome-foo && cd my-awesome-foo
+pnpm init -y --scope=@ensono-actions --name=my-awesome-foo
 ```
 
 This will generate a skeleton package.json which is required
@@ -82,7 +82,7 @@ Using typescript and a src as dir for all TS + tests (either colocated or in a s
 
 copy over tsconfig.json/jest.config.js from `playground-echo` task, it will inherit all root level specs for both TS and Jest, with the ability to override.
 
-Name your main file `src/index.ts` this should be minimal as you would need to use the TaskMockRunner to test it as it is self-invoking file
+Name your main file `src/index.ts` this should be minimal as all it needs to inlcude is the method call to your task. See existing tasks for examples of both sync and async actions.
 
 Adding any dependencies should always be installed via `pnpm i -D DEPNAME@0.0.1 --save-exact` and as devDependencies as the bundler will only take what it needs, `@SEMVER` can be omitted if you use `--save-exact`.
 
@@ -93,5 +93,3 @@ See the [.github/workflows/tester.yml](./.github/workflows/tester.yml) for detai
 IF a task outputs a variable - there is a slightly different way to pick it up:
 - within the same job 
 - across different jobs
-
-## Publishing multiple versions
