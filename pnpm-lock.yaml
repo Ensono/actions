@@ -58,13 +58,11 @@ importers:
         specifier: 5.4.5
         version: 5.4.5
 
-  .github/actions/process-json/v0: {}
+  actions/playground-echo: {}
 
-  tasks/playground-echo: {}
+  actions/process-json: {}
 
-  tasks/process-json: {}
-
-  tasks/taskctl-setup:
+  actions/taskctl-setup:
     devDependencies:
       '@actions/io':
         specifier: 1.1.3

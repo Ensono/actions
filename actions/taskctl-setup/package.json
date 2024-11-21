@@ -1,5 +1,5 @@
 {
-  "name": "@ensono-action/taskctl-setup",
+  "name": "@ensono-actions/taskctl-setup",
   "version": "1.0.0",
   "description": "Sets up on host the taskctl binary",
   "main": "task.js",

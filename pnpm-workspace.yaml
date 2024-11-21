@@ -1,5 +1,5 @@
 packages:
   # - ".github/actions/**"
-  - "tasks/**"
+  - "actions/**"
   - "libs/**"
 

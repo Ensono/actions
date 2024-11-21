@@ -1,5 +1,5 @@
 {
-  "name": "@ensono-action/playground-echo",
+  "name": "@ensono-actions/playground-echo",
   "version": "1.0.0",
   "description": "This is a sample task that does nothing other than echo inputs",
   "main": "index.js",

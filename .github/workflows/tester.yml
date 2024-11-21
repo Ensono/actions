@@ -14,27 +14,28 @@ jobs:
       complex2Level__key1__c2l_key1: ${{ steps.publishedJson.outputs.complex2Level__key1__c2l_key1 }}
     steps:
     - uses: actions/checkout@v4
-    # - uses: ./tasks/process-json
-    #   id: flattenedJson
-    #   with: 
-    #     separator: "__"
-    #     jsonStringOrPath: tasks/process-json/.tests/sample-output.json
-    #     isTerraformOutput: true
-    # - run: |
-    #     env
-    #     echo ${{ steps.flattenedJson.outputs.complex2Level__key1__c2l_key1 }}
-    #     echo ${{ steps.flattenedJson.outputs.complex2Level_arr__key1__c2larr_key1 }}
-# https://github.com/Ensono/taskctl/releases/download/2.0.0/taskctl-linux-amd64
     - uses: ensono/actions/tasks/process-json@v0.2.1
       id: publishedJson
       with: 
         separator: "__"
-        jsonStringOrPath: tasks/process-json/.tests/sample-output.json
+        jsonStringOrPath: actions/process-json/.tests/sample-output.json
         isTerraformOutput: true
     - name: test within the job 
       run: |
         echo "complex2Level__key1__c2l_key1: ${{ steps.publishedJson.outputs.complex2Level__key1__c2l_key1 }}"
         echo "complex2Level_arr__key1__c2larr_key1: ${{ steps.publishedJson.outputs.complex2Level_arr__key1__c2larr_key1 }}"
+
+  tascktl-setup:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+        - uses: ./actions/taskctl-setup
+          id: taskctlsetup
+          with: 
+            version: latest
+            isPrerelease: true
+        - run: |
+            taskctl -v
 
   across-jobs:
     needs: 

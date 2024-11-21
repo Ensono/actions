@@ -6,7 +6,7 @@ const mergedRaw = require('./.combined-raw.json')
 let map = createCoverageMap()
 
 for (const fk of Object.keys(mergedRaw)) {
-  const reportKey = fk.includes("/libs/") ? fk.split("/libs/")[1] : fk.split("/tasks/")[1]
+  const reportKey = fk.includes("/libs/") ? fk.split("/libs/")[1] : fk.split("/actions/")[1]
   const jsonCoverageMap =  createCoverageMap({[reportKey]: createFileCoverage(mergedRaw[fk])});
   map.merge(jsonCoverageMap);
 }

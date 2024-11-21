@@ -3,12 +3,11 @@ import {
     debug,
     error,
     getBooleanInput,
-    getInput,
-    setFailed
+    getInput
 } from "@actions/core"
 import { mv } from "@actions/io"
 import { downloadTool } from "@actions/tool-cache"
-import { chmod, mkdir } from "fs/promises"
+import { chmod } from "fs/promises"
 import { arch, platform } from "os"
 import { dirname, join } from "path"
 
@@ -24,16 +23,14 @@ export const parseConfig = () => {
         required: false,
         trimWhitespace: true,
     })
-    const downloadDir = getInput("downloadDir", {required: false})
     const isPrerelease = getBooleanInput("isPrerelease", { required: false })
     return {
         version,
         isPrerelease,
-        downloadDir
     }
 }
 
-const RELEASES_BASE_URL = ` https://github.com/Ensono/taskctl/releases`
+const RELEASES_BASE_URL = `https://github.com/Ensono/taskctl/releases`
 
 const RELEASES_API_URL = `https://api.github.com/repos/Ensono/taskctl/releases`
 
@@ -72,10 +69,10 @@ const getOsArch = () => {
  */
 const getUrl = (version: string, os: string, arch: string) => {
     return version == "latest" ? 
-        // latest version specified
-        `${RELEASES_BASE_URL}/latest/download/taskctl-${os}-${arch}${os == "win32" ? ".exe" : ""}` :
+        // latest version
+        `${RELEASES_BASE_URL}/latest/download/taskctl-${os}-${arch}${os === "windows" ? ".exe" : ""}` :
         // specific version specified 
-        `${RELEASES_BASE_URL}/download/${version}/taskctl-${os}-${arch}${os == "win32" ? ".exe" : ""}`
+        `${RELEASES_BASE_URL}/download/${version}/taskctl-${os}-${arch}${os === "windows" ? ".exe" : ""}`
 }
 
 /**
@@ -86,9 +83,11 @@ const getUrl = (version: string, os: string, arch: string) => {
  * @returns 
  */
 export const getPrereleaseVersion = async (version: string) => {
-    const resp = await fetch(RELEASES_API_URL, {method: "Get"}).catch((ex) => {
-        error(`unable to fetch prerelease URL`)
-    }) as Response
+    const resp = await fetch(RELEASES_API_URL, {method: "Get"}).catch((ex: Error) => {
+        debug(ex.stack)
+        throw new Error(`unable to fetch prerelease URL, ${ex.message}`)
+    })
+
     const prereleaseVersions = (await resp.json() as GHRelease[]).filter((f) => f.prerelease)
     if (prereleaseVersions?.length < 1) {
         throw new Error("no prereleases found")
@@ -112,10 +111,9 @@ export const getPrereleaseVersion = async (version: string) => {
  * @param param0 
  */
 const downloadBinary = async ({
-    version,
-    isPre } : {
-    version: string
-    isPre: boolean
+    version,isPre 
+} : {
+    version: string; isPre: boolean 
 }) => {
     const { osName, archName } = getOsArch()
 
@@ -129,14 +127,16 @@ const downloadBinary = async ({
     const pathToBin = await downloadTool(url).catch((ex: Error) => {
         throw new Error("unable to download tool, " + ex.message)
     })
-    try {
-        let target = join(dirname(pathToBin), "taskctl")
-        await mv(pathToBin, target)
-        addPath(dirname(pathToBin))
-        await chmod(target, 0o777)
-    } catch(ex) {
-        throw new Error ("unable to add to PATH " + ex?.message)
-    }
+    let target = join(dirname(pathToBin), "taskctl")
+    await mv(pathToBin, target).catch((ex: Error) => {
+        debug(ex.message)
+        throw new Error("unable to move bin: " + pathToBin)
+    })
+    await chmod(target, 0o777).catch((ex: Error) => {
+        debug(ex.message)
+        throw new Error("unable to make executable: " + pathToBin)
+    })
+    return target
 }
 
 /**
@@ -146,19 +146,20 @@ const downloadBinary = async ({
  */
 export const runAction = async () => {
 
-    const { version, isPrerelease, downloadDir } = parseConfig()
-
-    await mkdir(downloadDir, { recursive: true }).catch((ex: Error) => {
-        error(`unable to create the download directory ${ex.message}`)
-        setFailed(ex?.message)
-        return
-    })
+    const { version, isPrerelease } = parseConfig()
 
     await downloadBinary({ 
         version, 
         isPre: isPrerelease
+    })
+    .then((pathToBin)=> {
+        // addPath does not throw
+        // (if for whatever reason it will, 
+        // it would caught by callee (main/index) catch block)
+        addPath(dirname(pathToBin))
     }).catch((ex: Error) =>{
+        error(ex.message)
         debug(ex.stack)
-        setFailed(ex?.message)
+        return Promise.reject(ex)
     })
 }
