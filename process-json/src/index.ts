@@ -1,5 +1,5 @@
 /**
- * Process Nested JSON TFS task
+ * Process Nested JSON Action
  *
  */
 /* istanbul ignore next */ 

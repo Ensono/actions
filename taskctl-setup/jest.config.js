@@ -1,4 +1,4 @@
-const root = require("../../jest.config")
+const root = require("../jest.config")
 
 module.exports = {
   ...root,
@@ -7,13 +7,10 @@ module.exports = {
   setupFiles: [
     "<rootDir>/.testEnv.js"
   ],
-  // 
   coverageThreshold: {
     "global": {
-      "statements": 5,
-      "branches": 5,
-      "functions": 5,
-      "lines": 8
+      ...root.coverageThreshold.global,
+      "branches": 79,
     }
   },
   verbose: true
