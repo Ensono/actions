@@ -1,5 +1,5 @@
 {
-  "name": "@ensono-task/process-json-output",
+  "name": "@ensono-action/process-json-output",
   "version": "1.0.0",
   "description": "This action takes any JSON input and flattens the structure into a single level hashmap, and outputs to GHA Outputs and env variables, respecting secrets",
   "main": "task.js",

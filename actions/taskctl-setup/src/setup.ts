@@ -37,23 +37,21 @@ const RELEASES_BASE_URL = ` https://github.com/Ensono/taskctl/releases`
 
 const RELEASES_API_URL = `https://api.github.com/repos/Ensono/taskctl/releases`
 
-// node os.Arch() values mapped to Go Build GOARCH
-const archValMap = {
-    x32: '386',
-    x64: "amd64",
-    arm64: "arm64",
-    // "arm": "arm64", 
-}
-
-// node os.Platform() values mapped to Go Build GOOS
-const osValMap = {
-    "win32": "windows",
-    "linux": "linux",
-    "darwin": "darwin",
-}
 
 const getOsArch = () => {
+    // node os.Arch() values mapped to Go Build GOARCH
+    const archValMap = {
+        x32: '386',
+        x64: "amd64",
+    }
+
+    // node os.Platform() values mapped to Go Build GOOS
+    const osValMap = {
+        win32: "windows"
+    }
+
     const [os, architecture] = [ platform(), arch()]
+    
     return {
         osName: osValMap[os] || os  as string,
         archName: archValMap[architecture] || architecture as string,

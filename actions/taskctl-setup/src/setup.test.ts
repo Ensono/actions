@@ -30,6 +30,7 @@ describe("setup succeeds", () => {
         mockGetInput.mockReturnValueOnce(".taskctl")
         // isTF
         mockGetBooleanInput.mockReturnValueOnce(false)
+        // workaround for local vs GHA run unit tests
         let tmpRunnerDir = env.RUNNER_TEMP || env.TMPDIR
         env.RUNNER_TEMP = tmpRunnerDir
         let err = null
@@ -43,5 +44,9 @@ describe("setup succeeds", () => {
         expect(env?.PATH?.split(":")).toContain(tmpRunnerDir?.substring(0, tmpRunnerDir.length-1))
 
         await rm(join(tmpRunnerDir as string, "taskctl"))
+   })
+
+   test("use default latest in prerelease mode", async() => {
+    
    })
 })
