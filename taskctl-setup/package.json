@@ -1,0 +1,19 @@
+{
+  "name": "@ensono-actions/taskctl-setup",
+  "version": "1.0.0",
+  "description": "Sets up on host the taskctl binary",
+  "main": "task.js",
+  "scripts": {
+    "test": "../node_modules/.bin/jest -c jest.config.js --coverage",
+    "test:watch": "../node_modules/.bin/jest --coverage -c jest.config.js --watchAll",
+    "build": "../node_modules/.bin/tsc --noEmit --skipLibCheck && ../node_modules/.bin/esbuild --bundle ./src/index.ts --outfile=task.js --banner:js='// Generated Code\n// Needs to be checked in' --platform=node --format=cjs",
+    "echo": "node task.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@actions/io": "1.1.3",
+    "@actions/tool-cache": "2.0.1"
+  }
+}

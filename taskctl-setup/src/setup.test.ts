@@ -1,10 +1,6 @@
 jest.mock("os")
 jest.mock("fs/promises")
-// , () => ({
-//     chmod: async () => jest.fn(),
-// }))
-// actions write to stdout
-// silence here
+// actions write to stdout silence here
 global.process.stdout.write = jest.fn(() => true)
 
 import * as mockSrv from "@actions/core"

@@ -7,7 +7,7 @@
     "build": "pnpm run build:libs && pnpm run --sort --filter='@ensono-actions/*' --no-bail build",
     "clean:local": "pnpm store prune && pnpm -r exec -- rm -rf node_modules dist build && rm -rf ./node_modules",
     "test": "pnpm run -r --no-bail --filter='@ensono-actions/*' --filter='@ensono-actions-lib/*' --sort test",
-    "test:merge": "istanbul-merge --out .combined-raw.json actions/**/.coverage/coverage-final.json libs/**/.coverage/coverage-final.json && node output-report.js",
+    "test:merge": "istanbul-merge --out .combined-raw.json **/.coverage/coverage-final.json && node output-report.js",
     "view:coverage": "npm run test:merge && open .coverage/index.html"
   },
   "devDependencies": {

@@ -58,11 +58,11 @@ importers:
         specifier: 5.4.5
         version: 5.4.5
 
-  actions/playground-echo: {}
+  playground-echo: {}
 
-  actions/process-json: {}
+  process-json: {}
 
-  actions/taskctl-setup:
+  taskctl-setup:
     devDependencies:
       '@actions/io':
         specifier: 1.1.3

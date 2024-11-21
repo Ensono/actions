@@ -1,0 +1,15 @@
+{
+  "name": "@ensono-actions/process-json-output",
+  "version": "1.0.0",
+  "description": "This action takes any JSON input and flattens the structure into a single level hashmap, and outputs to GHA Outputs and env variables, respecting secrets",
+  "main": "task.js",
+  "scripts": {
+    "test": "../node_modules/.bin/jest -c jest.config.js --coverage",
+    "test:watch": "../node_modules/.bin/jest --coverage -c jest.config.js --watchAll",
+    "build": "../node_modules/.bin/tsc --noEmit --skipLibCheck && ../node_modules/.bin/esbuild --bundle ./src/index.ts --outfile=task.js --banner:js='// Generated Code\n// Needs to be checked in' --platform=node --format=cjs",
+    "echo": "node task.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT"
+}
