@@ -1,7 +1,7 @@
 {
-  "name": "@ensono-actions/taskctl-setup",
+  "name": "@ensono-actions/eirctl-setup",
   "version": "1.0.0",
-  "description": "Sets up on host the taskctl binary",
+  "description": "Sets up on host the eirctl binary",
   "main": "task.js",
   "scripts": {
     "test": "../node_modules/.bin/jest -c jest.config.js --coverage",

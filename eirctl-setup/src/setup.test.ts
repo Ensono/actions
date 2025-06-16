@@ -15,7 +15,7 @@ import { runAction } from "./setup"
 const os = require("os")
 const fs = require("fs/promises")
 
-describe("taskctl setup", () => {
+describe("eirctl setup", () => {
     let mockDebug: jest.SpyInstance<void, [message: string], any>
     let mockError: jest.SpyInstance<
         void,
@@ -100,16 +100,16 @@ describe("taskctl setup", () => {
 
     test.each([
         // version,arc,os,expectUrl
-        ["latest", "amd64", "darwin", "latest/download/taskctl-darwin-amd64"],
-        ["latest", "arm64", "darwin", "latest/download/taskctl-darwin-arm64"],
-        ["latest", "x64", "win32", "latest/download/taskctl-windows-amd64.exe"],
-        ["latest", "x32", "win32", "latest/download/taskctl-windows-386.exe"],
-        ["latest", "x64", "linux", "latest/download/taskctl-linux-amd64"],
-        ["1.0.2", "amd64", "darwin", "download/1.0.2/taskctl-darwin-amd64"],
-        ["2.0.0", "arm64", "darwin", "download/2.0.0/taskctl-darwin-arm64"],
-        ["1.0.2", "x64", "win32", "download/1.0.2/taskctl-windows-amd64.exe"],
-        ["1.0.2", "x32", "win32", "download/1.0.2/taskctl-windows-386.exe"],
-        ["1.0.23", "x64", "linux", "download/1.0.23/taskctl-linux-amd64"],
+        ["latest", "amd64", "darwin", "latest/download/eirctl-darwin-amd64"],
+        ["latest", "arm64", "darwin", "latest/download/eirctl-darwin-arm64"],
+        ["latest", "x64", "win32", "latest/download/eirctl-windows-amd64.exe"],
+        ["latest", "x32", "win32", "latest/download/eirctl-windows-386.exe"],
+        ["latest", "x64", "linux", "latest/download/eirctl-linux-amd64"],
+        ["1.0.2", "amd64", "darwin", "download/1.0.2/eirctl-darwin-amd64"],
+        ["2.0.0", "arm64", "darwin", "download/2.0.0/eirctl-darwin-arm64"],
+        ["1.0.2", "x64", "win32", "download/1.0.2/eirctl-windows-amd64.exe"],
+        ["1.0.2", "x32", "win32", "download/1.0.2/eirctl-windows-386.exe"],
+        ["1.0.23", "x64", "linux", "download/1.0.23/eirctl-linux-amd64"],
     ])(
         "stable release successfully fetches binary with version (%s) using arch (%s) on platform(%s)",
         async (version, osArch, osPlatform, expectString) => {
@@ -139,22 +139,22 @@ describe("taskctl setup", () => {
             // ensure we have added the install location to the path
             expect(env?.PATH?.split(":")).toContain(tmpRunnerDir)
             expect(mockDownload).toHaveBeenCalledWith(
-                `https://github.com/Ensono/taskctl/releases/${expectString}`
+                `https://github.com/Ensono/eirctl/releases/${expectString}`
             )
         }
     )
     test.each([
         // version,arc,os,expectUrl
-        ["latest", "amd64", "darwin", "download/1.8.0/taskctl-darwin-amd64"],
-        ["latest", "arm64", "darwin", "download/1.8.0/taskctl-darwin-arm64"],
-        ["latest", "x64", "win32", "download/1.8.0/taskctl-windows-amd64.exe"],
-        ["latest", "x32", "win32", "download/1.8.0/taskctl-windows-386.exe"],
-        ["latest", "x64", "linux", "download/1.8.0/taskctl-linux-amd64"],
-        ["1.0.2", "amd64", "darwin", "download/1.0.2/taskctl-darwin-amd64"],
-        ["2.0.0", "arm64", "darwin", "download/2.0.0/taskctl-darwin-arm64"],
-        ["1.0.2", "x64", "win32", "download/1.0.2/taskctl-windows-amd64.exe"],
-        ["1.0.2", "x32", "win32", "download/1.0.2/taskctl-windows-386.exe"],
-        ["1.0.23", "x64", "linux", "download/1.0.23/taskctl-linux-amd64"],
+        ["latest", "amd64", "darwin", "download/1.8.0/eirctl-darwin-amd64"],
+        ["latest", "arm64", "darwin", "download/1.8.0/eirctl-darwin-arm64"],
+        ["latest", "x64", "win32", "download/1.8.0/eirctl-windows-amd64.exe"],
+        ["latest", "x32", "win32", "download/1.8.0/eirctl-windows-386.exe"],
+        ["latest", "x64", "linux", "download/1.8.0/eirctl-linux-amd64"],
+        ["1.0.2", "amd64", "darwin", "download/1.0.2/eirctl-darwin-amd64"],
+        ["2.0.0", "arm64", "darwin", "download/2.0.0/eirctl-darwin-arm64"],
+        ["1.0.2", "x64", "win32", "download/1.0.2/eirctl-windows-amd64.exe"],
+        ["1.0.2", "x32", "win32", "download/1.0.2/eirctl-windows-386.exe"],
+        ["1.0.23", "x64", "linux", "download/1.0.23/eirctl-linux-amd64"],
     ])(
         "prerelease mode successfully fetches binary with version (%s) using arch (%s) on platform(%s)",
         async (version, osArch, osPlatform, expectString) => {
@@ -222,7 +222,7 @@ describe("taskctl setup", () => {
             // ensure we have added the install location to the path
             expect(env?.PATH?.split(":")).toContain(tmpRunnerDir)
             expect(mockDownload).toHaveBeenCalledWith(
-                `https://github.com/Ensono/taskctl/releases/${expectString}`
+                `https://github.com/Ensono/eirctl/releases/${expectString}`
             )
         }
     )
@@ -363,7 +363,7 @@ describe("taskctl setup", () => {
         // isPre
         mockGetBooleanInput.mockReturnValueOnce(false)
         mockDownload.mockImplementationOnce(async () => {
-            return "/some/path/taskctl"
+            return "/some/path/eirctl"
         })
 
         fs.chmod = jest.fn(async() => {})
@@ -379,7 +379,7 @@ describe("taskctl setup", () => {
         expect(err).not.toBe(null)
         if (err != null) {
             expect(err).toBeInstanceOf(Error)
-            expect((err as Error)?.message).toBe("unable to move bin: /some/path/taskctl")
+            expect((err as Error)?.message).toBe("unable to move bin: /some/path/eirctl")
         }
     })
     test("chmod-ing tool fails", async() => {
@@ -388,7 +388,7 @@ describe("taskctl setup", () => {
         // isPre
         mockGetBooleanInput.mockReturnValueOnce(false)
         mockDownload.mockImplementationOnce(async () => {
-            return "/some/path/taskctl"
+            return "/some/path/eirctl"
         })
         mockMV.mockImplementationOnce(async () => {})
         fs.chmod = jest.fn(async() => {throw new Error("mocked err")})
@@ -404,7 +404,7 @@ describe("taskctl setup", () => {
         expect(err).not.toBe(null)
         if (err != null) {
             expect(err).toBeInstanceOf(Error)
-            expect((err as Error)?.message).toBe("unable to make executable: /some/path/taskctl")
+            expect((err as Error)?.message).toBe("unable to make executable: /some/path/eirctl")
         }
     })
 })

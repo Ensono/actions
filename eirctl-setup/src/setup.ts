@@ -30,9 +30,9 @@ export const parseConfig = () => {
     }
 }
 
-const RELEASES_BASE_URL = `https://github.com/Ensono/taskctl/releases`
+const RELEASES_BASE_URL = `https://github.com/Ensono/eirctl/releases`
 
-const RELEASES_API_URL = `https://api.github.com/repos/Ensono/taskctl/releases`
+const RELEASES_API_URL = `https://api.github.com/repos/Ensono/eirctl/releases`
 
 
 const getOsArch = () => {
@@ -58,9 +58,9 @@ const getOsArch = () => {
 /**
  * getUrl looks for a specific release version 
  * 
- * version specific URL: https://github.com/Ensono/taskctl/releases/download/2.0.0/taskctl-linux-amd64
+ * version specific URL: https://github.com/Ensono/eirctl/releases/download/2.0.0/eirctl-linux-amd64
  * 
- * default latest release: https://github.com/Ensono/taskctl/releases/latest/download/taskctl-darwin-arm64
+ * default latest release: https://github.com/Ensono/eirctl/releases/latest/download/eirctl-darwin-arm64
  * 
  * @param version 
  * @param os 
@@ -70,15 +70,15 @@ const getOsArch = () => {
 const getUrl = (version: string, os: string, arch: string) => {
     return version == "latest" ? 
         // latest version
-        `${RELEASES_BASE_URL}/latest/download/taskctl-${os}-${arch}${os === "windows" ? ".exe" : ""}` :
+        `${RELEASES_BASE_URL}/latest/download/eirctl-${os}-${arch}${os === "windows" ? ".exe" : ""}` :
         // specific version specified 
-        `${RELEASES_BASE_URL}/download/${version}/taskctl-${os}-${arch}${os === "windows" ? ".exe" : ""}`
+        `${RELEASES_BASE_URL}/download/${version}/eirctl-${os}-${arch}${os === "windows" ? ".exe" : ""}`
 }
 
 /**
  * pre-release version checks the prerelease URLs and looks for either the latest or a specific version
  * 
- * URL: https://api.github.com/repos/Ensono/taskctl/releases
+ * URL: https://api.github.com/repos/Ensono/eirctl/releases
  * @param version 
  * @returns 
  */
@@ -127,7 +127,7 @@ const downloadBinary = async ({
     const pathToBin = await downloadTool(url).catch((ex: Error) => {
         throw new Error("unable to download tool, " + ex.message)
     })
-    let target = join(dirname(pathToBin), "taskctl")
+    let target = join(dirname(pathToBin), "eirctl")
     await mv(pathToBin, target).catch((ex: Error) => {
         debug(ex.message)
         throw new Error("unable to move bin: " + pathToBin)
@@ -142,7 +142,7 @@ const downloadBinary = async ({
 /**
  * runTask
  * @returns
- * @description downloads and sets up taskctl on the host
+ * @description downloads and sets up eirctl on the host
  */
 export const runAction = async () => {
 

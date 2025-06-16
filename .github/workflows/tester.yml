@@ -25,18 +25,17 @@ jobs:
         echo "complex2Level__key1__c2l_key1: ${{ steps.publishedJson.outputs.complex2Level__key1__c2l_key1 }}"
         echo "complex2Level_arr__key1__c2larr_key1: ${{ steps.publishedJson.outputs.complex2Level_arr__key1__c2larr_key1 }}"
 
-  tascktl-setup:
+  eirctl-setup:
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@v4
-        # - uses: ensono/actions/taskctl-setup@main
-        - uses: ./taskctl-setup
-          id: taskctlsetup
+        - uses: ./eirctl-setup
+          id: eirctlsetup
           with: 
             version: latest
             isPrerelease: true
         - run: |
-            taskctl -v
+            eirctl -v
 
   across-jobs:
     needs: 
