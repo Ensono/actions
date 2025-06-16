@@ -1,6 +1,6 @@
-name: 'taskctl-setup'
+name: 'eirctl-setup'
 description: |
-  Sets up taskctl binary. 
+  Sets up eirctl binary. 
 
   Allows for version specification.
 

@@ -29,7 +29,7 @@ jobs:
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@v4
-        # - uses: ensono/actions/taskctl-setup@main
+        # - uses: ensono/actions/taskctl-setup@v0.3.0
         - uses: ./taskctl-setup
           id: taskctlsetup
           with: 

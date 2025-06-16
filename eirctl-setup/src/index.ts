@@ -1,5 +1,5 @@
 /**
- * Setup taskctl Action
+ * Setup eirctl Action
  *
  */
 /* istanbul ignore next */ 
@@ -8,5 +8,5 @@ import { debug, setFailed } from "@actions/core"
 import { runAction } from "./setup"
 /* istanbul ignore next */ 
 (async () => runAction()
-.then((d) => debug(`taskctl downloaded and ready to use`))
+.then((d) => debug(`eirctl downloaded and ready to use`))
 .catch((ex) => setFailed(ex?.message)))()
