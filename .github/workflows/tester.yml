@@ -29,7 +29,6 @@ jobs:
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@v4
-        # - uses: ensono/actions/eirctl-setup@v0.3.0
         - uses: ./eirctl-setup
           id: eirctlsetup
           with: 
