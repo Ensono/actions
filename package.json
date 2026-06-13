@@ -14,7 +14,7 @@
     "@jest/globals": "29.6.4",
     "@types/jest": "29.5.4",
     "@types/node": "~18.0",
-    "esbuild": "0.21.1",
+    "esbuild": "0.28.1",
     "istanbul-lib-coverage": "3.2.0",
     "istanbul-lib-report": "3.0.1",
     "istanbul-merge": "2.0.0",
