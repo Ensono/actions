@@ -1,12 +1,12 @@
 import {
     addPath,
     debug,
-    error,
     getBooleanInput,
     getInput
 } from "@actions/core"
 import { mv } from "@actions/io"
 import { downloadTool } from "@actions/tool-cache"
+import { getErrorMessage, getErrorStack } from "@ensono-actions/utils"
 import { chmod } from "fs/promises"
 import { arch, platform } from "os"
 import { dirname, join } from "path"
@@ -40,12 +40,13 @@ const getOsArch = () => {
     const archValMap = {
         x32: '386',
         x64: "amd64",
-    }
+        // fallback mapping for x32 architectures not covered by NodeJS.Architecture at current version
+    } as Record<NodeJS.Architecture | 'x32', string>
 
     // node os.Platform() values mapped to Go Build GOOS
     const osValMap = {
         win32: "windows"
-    }
+    } as Record<NodeJS.Platform, string>
 
     const [os, architecture] = [ platform(), arch()]
     
@@ -84,8 +85,8 @@ const getUrl = (version: string, os: string, arch: string) => {
  */
 export const getPrereleaseVersion = async (version: string) => {
     const resp = await fetch(RELEASES_API_URL, {method: "Get"}).catch((ex: Error) => {
-        debug(ex.stack)
-        throw new Error(`unable to fetch prerelease URL, ${ex.message}`)
+        debug(getErrorStack(ex))
+        throw new Error(`unable to fetch prerelease URL, ${getErrorMessage(ex)}`)
     })
 
     const prereleaseVersions = (await resp.json() as GHRelease[]).filter((f) => f.prerelease)
@@ -114,7 +115,7 @@ const downloadBinary = async ({
     version,isPre 
 } : {
     version: string; isPre: boolean 
-}) => {
+}): Promise<void> => {
     const { osName, archName } = getOsArch()
 
     if (isPre) {
@@ -125,18 +126,18 @@ const downloadBinary = async ({
 
     const url = getUrl(version, osName, archName)
     const pathToBin = await downloadTool(url).catch((ex: Error) => {
-        throw new Error("unable to download tool, " + ex.message)
+        throw new Error("unable to download tool, " + getErrorMessage(ex))
     })
     let target = join(dirname(pathToBin), "eirctl")
     await mv(pathToBin, target).catch((ex: Error) => {
-        debug(ex.message)
+        debug(getErrorMessage(ex))
         throw new Error("unable to move bin: " + pathToBin)
     })
     await chmod(target, 0o777).catch((ex: Error) => {
-        debug(ex.message)
+        debug(getErrorMessage(ex))
         throw new Error("unable to make executable: " + pathToBin)
     })
-    return target
+    addPath(dirname(target))
 }
 
 /**
@@ -144,22 +145,22 @@ const downloadBinary = async ({
  * @returns
  * @description downloads and sets up eirctl on the host
  */
-export const runAction = async () => {
+export const runAction = async (): Promise<void> => {
 
     const { version, isPrerelease } = parseConfig()
 
-    await downloadBinary({ 
+    return downloadBinary({ 
         version, 
         isPre: isPrerelease
     })
-    .then((pathToBin)=> {
-        // addPath does not throw
-        // (if for whatever reason it will, 
-        // it would caught by callee (main/index) catch block)
-        addPath(dirname(pathToBin))
-    }).catch((ex: Error) =>{
-        error(ex.message)
-        debug(ex.stack)
-        return Promise.reject(ex)
-    })
+    // .then((pathToBin)=> {
+    //     // addPath does not throw
+    //     // (if for whatever reason it will, 
+    //     // it would caught by callee (main/index) catch block)
+    //     addPath(dirname(pathToBin))
+    // }).catch((ex: Error) =>{
+    //     error(getErrorMessage(ex))
+    //     debug(getErrorStack(ex))
+    //     return Promise.reject(ex)
+    // })
 }
