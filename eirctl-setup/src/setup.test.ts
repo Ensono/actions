@@ -71,7 +71,6 @@ describe("eirctl setup", () => {
         mockGetBooleanInput.mockReturnValue(false)
         mockDownload.mockResolvedValue("/tmp/eirctl")
         mockMV.mockResolvedValue(undefined)
-        // mockFetch.mockResolvedValue(new Response())
         jest.spyOn(globalThis, "fetch").mockImplementation(mockFetch)
 
         // local vs GHA run unit tests
@@ -93,6 +92,7 @@ describe("eirctl setup", () => {
         mockFs.chmod.mockClear()
         mockOs.arch.mockClear()
         mockOs.platform.mockClear()
+        mockFetch.mockClear()
     })
 
     test.each([
@@ -114,6 +114,8 @@ describe("eirctl setup", () => {
             mockGetInput.mockReturnValueOnce(version)
             // isPre
             mockGetBooleanInput.mockReturnValueOnce(false)
+            // sha256 input
+            mockGetInput.mockReturnValueOnce("sha256:123123124r8jr89etfhy9eh49h4rh3497rh439h")
             let tmpName = `random-${new Date().valueOf()}`
             mockDownload.mockResolvedValueOnce(join(tmpRunnerDir, tmpName))
             mockMV.mockResolvedValueOnce(undefined)
@@ -155,55 +157,52 @@ describe("eirctl setup", () => {
             mockGetInput.mockReturnValueOnce(version)
             // isPre
             mockGetBooleanInput.mockReturnValueOnce(true)
+            // sha256 input
+            mockGetInput.mockReturnValueOnce("sha256:mock123")
+
             let tmpName = `random-${new Date().valueOf()}`
 
-            mockDownload.mockImplementationOnce(async () => {
-                return join(tmpRunnerDir, tmpName)
-            })
-            mockMV.mockImplementationOnce(async () => {
-                return
-            })
+            mockDownload.mockResolvedValueOnce(join(tmpRunnerDir, tmpName))
+            mockMV.mockResolvedValueOnce()
 
             mockFs.chmod.mockResolvedValue(undefined)
             mockOs.platform.mockReturnValue(osPlatform)
             mockOs.arch.mockReturnValue(osArch)
 
-            mockFetch.mockImplementationOnce(async () => {
-                return {
-                    ...{} as Response,
-                    json: async () => {
-                        return [
-                            {
-                                tag_name: "1.7.1",
-                                target_commitish: "master",
-                                name: "1.7.1",
-                                draft: false,
-                                prerelease: false,
-                            },
-                            {
-                                tag_name: "1.8.0",
-                                target_commitish: "master",
-                                name: "1.8.0",
-                                draft: false,
-                                prerelease: true,
-                            },
-                            {
-                                tag_name: "1.8.1",
-                                target_commitish: "master",
-                                name: "1.8.1",
-                                draft: false,
-                                prerelease: false,
-                            },
-                            {
-                                tag_name: version,
-                                target_commitish: "master",
-                                name: version,
-                                draft: false,
-                                prerelease: true,
-                            },
-                        ]
-                    },
-                }
+            mockFetch.mockResolvedValueOnce({
+                ...{} as Response,
+                json: async () => {
+                    return [
+                        {
+                            tag_name: "1.7.1",
+                            target_commitish: "master",
+                            name: "1.7.1",
+                            draft: false,
+                            prerelease: false,
+                        },
+                        {
+                            tag_name: "1.8.0",
+                            target_commitish: "master",
+                            name: "1.8.0",
+                            draft: false,
+                            prerelease: true,
+                        },
+                        {
+                            tag_name: "1.8.1",
+                            target_commitish: "master",
+                            name: "1.8.1",
+                            draft: false,
+                            prerelease: false,
+                        },
+                        {
+                            tag_name: version,
+                            target_commitish: "master",
+                            name: version,
+                            draft: false,
+                            prerelease: true,
+                        },
+                    ]
+                },
             })
 
             let err = null
@@ -250,28 +249,29 @@ describe("eirctl setup", () => {
         mockGetInput.mockReturnValueOnce("latest")
         // isPre
         mockGetBooleanInput.mockReturnValueOnce(true)
-        mockFetch.mockImplementationOnce(async () => {
-            return {
-                ...{} as Response,
-                json: async () => {
-                    return [
-                        {
-                            tag_name: "1.7.1",
-                            target_commitish: "master",
-                            name: "1.7.1",
-                            draft: false,
-                            prerelease: false,
-                        },
-                        {
-                            tag_name: "1.8.1",
-                            target_commitish: "master",
-                            name: "1.8.1",
-                            draft: false,
-                            prerelease: false,
-                        },
-                    ]
-                },
-            }
+        // sha256 input
+        mockGetInput.mockReturnValueOnce("sha256:123123124r8jr89etfhy9eh49h4rh3497rh439h")
+
+        mockFetch.mockResolvedValueOnce({
+            ...{} as Response,
+            json: async () => {
+                return [
+                    {
+                        tag_name: "1.7.1",
+                        target_commitish: "master",
+                        name: "1.7.1",
+                        draft: false,
+                        prerelease: false,
+                    },
+                    {
+                        tag_name: "1.8.1",
+                        target_commitish: "master",
+                        name: "1.8.1",
+                        draft: false,
+                        prerelease: false,
+                    },
+                ]
+            },
         })
         mockOs.platform.mockReturnValue("foo")
         mockOs.arch.mockReturnValue("bar")
@@ -284,7 +284,7 @@ describe("eirctl setup", () => {
         expect(err).not.toBe(null)
         if (err != null) {
             expect(err).toBeInstanceOf(Error)
-            expect((err as Error)?.message.startsWith("no prereleases found")).toBe(true)
+            expect((err as Error)?.message).toBe("no prereleases found")
         }
     })
 
@@ -293,28 +293,29 @@ describe("eirctl setup", () => {
         mockGetInput.mockReturnValueOnce("2.7.1")
         // isPre
         mockGetBooleanInput.mockReturnValueOnce(true)
-        mockFetch.mockImplementationOnce(async () => {
-            return {
-                ...{} as Response,
-                json: async () => {
-                    return [
-                        {
-                            tag_name: "1.7.1",
-                            target_commitish: "master",
-                            name: "1.7.1",
-                            draft: false,
-                            prerelease: true,
-                        },
-                        {
-                            tag_name: "1.8.1",
-                            target_commitish: "master",
-                            name: "1.8.1",
-                            draft: false,
-                            prerelease: true,
-                        },
-                    ]
-                },
-            }
+        // sha256 input
+        mockGetInput.mockReturnValueOnce("sha256:123123124r8jr89etfhy9eh49h4rh3497rh439h")
+
+        mockFetch.mockResolvedValueOnce({
+            ...{} as Response,
+            json: async () => {
+                return [
+                    {
+                        tag_name: "1.7.1",
+                        target_commitish: "master",
+                        name: "1.7.1",
+                        draft: false,
+                        prerelease: true,
+                    },
+                    {
+                        tag_name: "1.8.1",
+                        target_commitish: "master",
+                        name: "1.8.1",
+                        draft: false,
+                        prerelease: true,
+                    },
+                ]
+            },
         })
         mockOs.platform.mockReturnValue("foo")
         mockOs.arch.mockReturnValue("bar")
@@ -327,7 +328,7 @@ describe("eirctl setup", () => {
         expect(err).not.toBe(null)
         if (err != null) {
             expect(err).toBeInstanceOf(Error)
-            expect((err as Error)?.message.startsWith("no prereleases found at version 2.7.1")).toBe(true)
+            expect((err as Error)?.message).toBe("no prereleases found at version 2.7.1")
         }
     })
 
@@ -358,7 +359,7 @@ describe("eirctl setup", () => {
         mockGetBooleanInput.mockReturnValueOnce(false)
         mockDownload.mockResolvedValueOnce("/some/path/eirctl")
 
-        mockFs.chmod.mockResolvedValue(undefined)
+        mockFs.chmod.mockResolvedValue()
         mockMV.mockRejectedValue(new Error("mocked err"))
         mockOs.platform.mockReturnValue("foo")
         mockOs.arch.mockReturnValue("bar")
@@ -379,9 +380,7 @@ describe("eirctl setup", () => {
         mockGetInput.mockReturnValueOnce("latest")
         // isPre
         mockGetBooleanInput.mockReturnValueOnce(false)
-        mockDownload.mockImplementationOnce(async () => {
-            return "/some/path/eirctl"
-        })
+        mockDownload.mockResolvedValueOnce("/some/path/eirctl")
         mockMV.mockImplementationOnce(async () => { })
         mockFs.chmod.mockRejectedValue(new Error("mocked err"))
         mockOs.platform.mockReturnValue("foo")
@@ -398,4 +397,45 @@ describe("eirctl setup", () => {
             expect((err as Error)?.message).toBe("unable to make executable: /some/path/eirctl")
         }
     })
+    test("runtime fail on missing SHA when version is set to non-latest", async () => {
+        // Arrange
+        mockGetInput.mockReturnValueOnce("v0.123.456")
+        mockGetBooleanInput.mockReturnValueOnce(false)
+        mockGetInput.mockReturnValueOnce("") // SHA256
+        let err = null
+        // Act
+        await runAction().catch((ex) => {
+            err = ex
+        })
+        // Assert
+        expect(err).not.toBe(null)
+        if (err != null) {
+            expect(err).toBeInstanceOf(Error)
+            expect((err as Error)?.message).toBe('The sha256 input is required when version is not latest.')
+        }
+    })
+    test.each([
+        // version,arc,os,expectUrl
+        ["latest"],
+        ["v1.0.2"],
+        ["v1.0.4-latest"],
+    ])(
+        "isPrerelease runtime fail on missing SHA when version is set (%s)",
+        async  (version) => {
+            // Arrange
+            mockGetInput.mockReturnValueOnce(version)
+            mockGetBooleanInput.mockReturnValueOnce(true)
+            mockGetInput.mockReturnValueOnce("") // SHA256
+            let err = null
+            // Act
+            await runAction().catch((ex) => {
+                err = ex
+            })
+            // Assert
+            expect(err).not.toBe(null)
+            if (err != null) {
+                expect(err).toBeInstanceOf(Error)
+                expect((err as Error)?.message).toBe('The sha256 input is required when version is not latest.')
+            }
+        })
 })

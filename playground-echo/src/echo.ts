@@ -8,7 +8,7 @@ import { debug, getBooleanInput, getInput, getMultilineInput, setFailed } from "
  * @returns 
  */
 export const parseConfig = () => {
-    const input1 = getInput("input1")
+    const input1 = getInput("input1", {required: true})
     const inputBool = getBooleanInput("inputBool", {required: false})
     return {
         input2StrArrComma: getMultilineInput("input2StrArrComma", {required: false}),
@@ -23,8 +23,8 @@ export const runTask = () => {
     try {
         config = parseConfig()
         debug(`config: ${JSON.stringify(config)}`)
-    } catch (ex) {
-        return setFailed(`unable to parse input: ${ex.message}`);
+    } catch (ex: unknown) {
+        return setFailed(`unable to parse input: ${(ex as Error)?.message}`);
     }
 }
 

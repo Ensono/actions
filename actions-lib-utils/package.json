@@ -1,13 +1,13 @@
 {
-  "name": "@ensono-actions/utils",
+  "name": "@ensono-actions-lib/utils",
   "version": "1.0.0",
   "private": true,
   "description": "Helper utils for various actions",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "test": "../node_modules/.bin/jest -c jest.config.js --coverage",
-    "test:watch": "../node_modules/.bin/jest --coverage -c jest.config.js --watchAll",
+    "test": "NODE_OPTIONS=--experimental-vm-modules ../node_modules/.bin/jest -c jest.config.js --coverage",
+    "test:watch": "NODE_OPTIONS=--experimental-vm-modules ../node_modules/.bin/jest --coverage -c jest.config.js --watchAll",
     "build": "../node_modules/.bin/tsc --skipLibCheck"
   },
   "keywords": [],

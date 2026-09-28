@@ -12,11 +12,11 @@ jobs:
   set-version:
     runs-on: ubuntu-latest
     container:
-      image: mcr.microsoft.com/dotnet/sdk:6.0 
+      image: mcr.microsoft.com/dotnet/sdk:10.0 
     outputs:
       semVer: ${{ steps.gitversion.outputs.semVer }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
       - name: install deps
@@ -26,17 +26,17 @@ jobs:
           git config user.email ${{ github.actor }}-ci@gha.org
           git config user.name ${{ github.actor }}
       - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v1.1.1
+        uses: gittools/actions/gitversion/setup@7417b1089e2c7de93510f1901d656ddf60bb024f # v4.7.0
         with:
-          versionSpec: '5.x'
+          versionSpec: "6.2.0"
       - name: Set SemVer Version
-        uses: gittools/actions/gitversion/execute@v1.1.1
+        uses: gittools/actions/gitversion/execute@7417b1089e2c7de93510f1901d656ddf60bb024f # v4.7.0
         id: gitversion
 
       - name: Set Version
         run: |
           echo "REVISION  -> $GITHUB_SHA"
-          echo "VERSION -> v${{ env.GitVersion_SemVer }}"
-          echo "MAJOR -> v${{ env.GitVersion_Major }}"
-          git tag -a v${{ env.GitVersion_SemVer }} -m "ci tag release semver" $GITHUB_SHA
-          git push origin v${{ env.GitVersion_SemVer }}
+          echo "VERSION -> v${{ steps.gitversion.outputs.semVer }}
+          echo "MAJOR -> v${{ steps.gitversion.outputs.major }}
+          git tag -a v${{ steps.gitversion.outputs.semVer }} -m "ci tag release semver" $GITHUB_SHA
+          git push origin v${{ steps.gitversion.outputs.semVer }}

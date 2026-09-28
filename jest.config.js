@@ -10,11 +10,7 @@ module.exports = {
       "ts-jest",
       {
         useESM: true,
-        tsconfig: "<rootDir>/tsconfig.jest.json"
-        // tsconfig: {
-        //   module: "ESNext",
-        //   moduleResolution: "Bundler",
-        // }
+        tsconfig: "../tsconfig.jest.json"
       }
     ]
   },

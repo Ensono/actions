@@ -23,7 +23,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: '24.x'
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
 
@@ -42,11 +42,10 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
       
-      - name: Code Coverage Summary Report
-        uses: irongut/CodeCoverageSummary@v1.3.0
+      - name: Upload coverage report
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        uses: actions/upload-code-coverage@d8e329117199404bba6fc81efe8093dc7c015e34 # v1.4.7
         with:
-          filename: '.coverage/cobertura-coverage.xml'
-          badge: true
-          format: 'markdown'
-          output: 'both'
-          thresholds: '80 80'
+          file: '.coverage/cobertura-coverage.xml'
+          language: js
+          label: actions-coverage
