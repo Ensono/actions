@@ -27,9 +27,21 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
 
-      - name: Run Test
+      - name: Check Actions integrity
         run: |
           pnpm i
+          pnpm run build
+          git status --porcelain --untracked-files=no
+          if [ ! -z "$(git status --porcelain --untracked-files=no)" ]; then
+            if [ ! -z ${CI+x} ] ; then
+              echo "In CI with an unclean tree - exiting"
+              echo "Info: make sure you have run pnpm run build locally and committed"
+              exit 1
+            fi
+          fi
+
+      - name: Run Test
+        run: |
           pnpm run test
           pnpm run test:merge
 
