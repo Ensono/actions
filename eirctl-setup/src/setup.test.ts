@@ -9,6 +9,7 @@ import {
 
 import type { InputOptions } from "@actions/core"
 import type { MoveOptions } from "@actions/io"
+import { Buffer } from "node:buffer"
 import type { OutgoingHttpHeaders } from "node:http"
 import { join } from "node:path"
 import process, { env } from "node:process"
@@ -45,6 +46,7 @@ const mockOs = {
 
 const mockFs = {
     chmod: jest.fn<(path: string, mode: number) => Promise<void>>(),
+    readFile: jest.fn<(path: string) => Promise<Buffer>>(),
 }
 
 jest.unstable_mockModule("os", () => mockOs)
@@ -52,7 +54,6 @@ jest.unstable_mockModule("fs/promises", () => mockFs)
 
 process.stdout.write = jest.fn(() => true)
 
-// import { runAction } from "./setup"
 const { runAction } = await import("./setup.ts")
 
 describe("eirctl setup", () => {
@@ -62,6 +63,7 @@ describe("eirctl setup", () => {
         jest.clearAllMocks()
 
         mockFs.chmod.mockResolvedValue(undefined)
+        mockFs.readFile.mockResolvedValue(Buffer.from("mock eirctl binary"))
         mockOs.platform.mockReturnValue("darwin")
         mockOs.arch.mockReturnValue("x64")
 
@@ -115,7 +117,7 @@ describe("eirctl setup", () => {
             // isPre
             mockGetBooleanInput.mockReturnValueOnce(false)
             // sha256 input
-            mockGetInput.mockReturnValueOnce("sha256:123123124r8jr89etfhy9eh49h4rh3497rh439h")
+            mockGetInput.mockReturnValueOnce("9a6c5519468cba5e5dd6a28c9fb19a3f2e4f756e7b4ee343099976318cc47955")
             let tmpName = `random-${new Date().valueOf()}`
             mockDownload.mockResolvedValueOnce(join(tmpRunnerDir, tmpName))
             mockMV.mockResolvedValueOnce(undefined)
@@ -158,7 +160,7 @@ describe("eirctl setup", () => {
             // isPre
             mockGetBooleanInput.mockReturnValueOnce(true)
             // sha256 input
-            mockGetInput.mockReturnValueOnce("sha256:mock123")
+            mockGetInput.mockReturnValueOnce("9a6c5519468cba5e5dd6a28c9fb19a3f2e4f756e7b4ee343099976318cc47955")
 
             let tmpName = `random-${new Date().valueOf()}`
 
@@ -250,7 +252,7 @@ describe("eirctl setup", () => {
         // isPre
         mockGetBooleanInput.mockReturnValueOnce(true)
         // sha256 input
-        mockGetInput.mockReturnValueOnce("sha256:123123124r8jr89etfhy9eh49h4rh3497rh439h")
+        mockGetInput.mockReturnValueOnce("sha256:9a6c5519468cba5e5dd6a28c9fb19a3f2e4f756e7b4ee343099976318cc47955")
 
         mockFetch.mockResolvedValueOnce({
             ...{} as Response,
@@ -294,7 +296,7 @@ describe("eirctl setup", () => {
         // isPre
         mockGetBooleanInput.mockReturnValueOnce(true)
         // sha256 input
-        mockGetInput.mockReturnValueOnce("sha256:123123124r8jr89etfhy9eh49h4rh3497rh439h")
+        mockGetInput.mockReturnValueOnce("9a6c5519468cba5e5dd6a28c9fb19a3f2e4f756e7b4ee343099976318cc47955")
 
         mockFetch.mockResolvedValueOnce({
             ...{} as Response,
@@ -421,7 +423,7 @@ describe("eirctl setup", () => {
         ["v1.0.4-latest"],
     ])(
         "isPrerelease runtime fail on missing SHA when version is set (%s)",
-        async  (version) => {
+        async (version) => {
             // Arrange
             mockGetInput.mockReturnValueOnce(version)
             mockGetBooleanInput.mockReturnValueOnce(true)
@@ -438,4 +440,72 @@ describe("eirctl setup", () => {
                 expect((err as Error)?.message).toBe('The sha256 input is required when version is not latest.')
             }
         })
+
+    test.each([
+        ["sha256:incorrecthash", "v.123.434", false],
+        ["incorrecthash","v.123.434", true],
+    ])("verifyChecksum fails on incorrect SHA (%s) on version %s with isPrerelease set to %s", 
+        async (sha, version, isPrerelease) => {
+        // Arrange
+        mockGetInput.mockReturnValueOnce(version)
+        // isPre
+        mockGetBooleanInput.mockReturnValueOnce(isPrerelease)
+        // sha256 input
+        mockGetInput.mockReturnValueOnce(sha)
+        let tmpName = `random-${new Date().valueOf()}`
+        mockDownload.mockResolvedValueOnce(join(tmpRunnerDir, tmpName))
+        mockMV.mockResolvedValueOnce(undefined)
+
+        mockFs.chmod.mockResolvedValue(undefined)
+        mockOs.platform.mockReturnValue("linux")
+        mockOs.arch.mockReturnValue("x64")
+            mockFetch.mockResolvedValueOnce({
+                ...{} as Response,
+                json: async () => {
+                    return [
+                        {
+                            tag_name: "1.7.1",
+                            target_commitish: "master",
+                            name: "1.7.1",
+                            draft: false,
+                            prerelease: false,
+                        },
+                        {
+                            tag_name: "1.8.0",
+                            target_commitish: "master",
+                            name: "1.8.0",
+                            draft: false,
+                            prerelease: true,
+                        },
+                        {
+                            tag_name: "1.8.1",
+                            target_commitish: "master",
+                            name: "1.8.1",
+                            draft: false,
+                            prerelease: false,
+                        },
+                        {
+                            tag_name: version,
+                            target_commitish: "master",
+                            name: version,
+                            draft: false,
+                            prerelease: true,
+                        },
+                    ]
+                },
+            })
+
+        let err = null
+        // Act
+        await runAction().catch((ex) => {
+            err = ex
+        })
+        // Assert
+        expect(mockAddPath).not.toHaveBeenCalled()
+        expect(err).not.toBe(null)
+            if (err != null) {
+                expect(err).toBeInstanceOf(Error)
+                expect((err as Error)?.message).toBe('checksum verification failed for ' + version)
+            }
+    })
 })

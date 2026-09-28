@@ -77,7 +77,11 @@ importers:
 
   playground-echo: {}
 
-  process-json: {}
+  process-json:
+    devDependencies:
+      '@ensono-actions-lib/utils':
+        specifier: workspace:^
+        version: link:../actions-lib-utils
 
 packages:
 

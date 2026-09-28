@@ -7,8 +7,9 @@ import {
 } from "@actions/core"
 import { mv } from "@actions/io"
 import { downloadTool, } from "@actions/tool-cache"
-import { getErrorMessage, getErrorStack } from "../../actions-lib-utils/dist"
-import { chmod } from "fs/promises"
+import { getErrorMessage, getErrorStack } from "@ensono-actions-lib/utils"
+import crypto from "crypto"
+import { chmod, readFile } from "fs/promises"
 import { arch, platform } from "os"
 import { dirname, join } from "path"
 
@@ -27,11 +28,11 @@ export const parseConfig = () => {
     })
     const isPrerelease = getBooleanInput("isPrerelease", { required: false })
     const sha256 = getInput('sha256', { required: false, trimWhitespace: true })
-    
+
     if ((version !== 'latest' && !sha256) || (isPrerelease && !sha256)) {
         throw new Error('The sha256 input is required when version is not latest.')
     }
-    
+
     return {
         version,
         isPrerelease,
@@ -117,6 +118,18 @@ export const getPrereleaseVersion = async (config: Pick<SetupConfig, "version">)
     throw new Error(`no prereleases found at version ${config.version}`)
 }
 
+const verifyChecksum = async (config: SetupConfig, filePath: string): Promise<void> => {
+    const fileBuffer = await readFile(filePath)
+    const hash = crypto.createHash("sha256").update(fileBuffer).digest("hex")
+    // sha256 can be supplied in both forms
+    // 
+    // sha256:0b749ebef493338aff5d16118371e5be70e393d1ae26c58b88f4ec1d852fcffd
+    // or just 
+    // 0b749ebef493338aff5d16118371e5be70e393d1ae26c58b88f4ec1d852fcffd
+    if (hash !== config.sha256.replace("sha256:", "")) {
+        throw new Error(`checksum verification failed for ${config.version}`)
+    }
+}
 
 /**
  * downloads the specified binary and makes it executable
@@ -145,6 +158,9 @@ const downloadBinary = async (config: SetupConfig): Promise<void> => {
         debug(getErrorMessage(ex))
         throw new Error("unable to make executable: " + pathToBin)
     })
+    if (config.version != "latest" && config.sha256 != "") {
+        await verifyChecksum(config, target)
+    }
     addPath(dirname(target))
 }
 

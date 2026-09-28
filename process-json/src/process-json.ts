@@ -1,4 +1,5 @@
 import { debug, error, exportVariable, getBooleanInput, getInput, setFailed, setOutput, setSecret } from "@actions/core"
+import { getErrorStack } from "@ensono-actions-lib/utils"
 import { existsSync, readFileSync } from "fs"
 import { parse } from "path"
 import { cwd } from "process"
@@ -25,7 +26,7 @@ export const parseConfig = () => {
             })
         }
         parsedJson = JSON.parse(jsonString)
-    } catch (ex) {
+    } catch (ex: any) {
         error(
             `unable to parse jsonStringOrPath(${jsonStringOrPath}): ${ex.message}`
         )
@@ -82,12 +83,12 @@ export const flattenObject = ({
      * @param head
      * @returns
      */
-    function paths(obj: any = {}, head: string = "") {
-        return Object.entries(obj).reduce((flattened, [key, value]) => {
-            let path = addDelimiter(head, key)
+    function paths(obj: Record<string, any> = {}, head: string = ""): OutputMap[] {
+        return Object.entries(obj).reduce<OutputMap[]>((flattened, [key, value]) => {
+            const path = addDelimiter(head, key)
             if (isTfOut && (key == "type" || key == "sensitive"))
                 return flattened
-            let val = isTfOut ? (value as any)?.value || value : value
+            const val = isTfOut ? (value as any)?.value ?? value : value
             return isObject(val)
                 ? flattened.concat(paths(val, path))
                 : flattened.concat({ path, val })
@@ -148,8 +149,8 @@ export const runAction = () => {
             }
             setOutputVars(output.path, output.val, markAllOutputAsSecret)
         }
-    } catch (ex) {
-        debug(ex.stack)
+    } catch (ex: any) {
+        debug(getErrorStack(ex?.stack))
         setFailed(ex?.message)
     }
 }
