@@ -62,3 +62,4 @@ jobs:
           file: '.coverage/cobertura-coverage.xml'
           language: js
           label: actions-coverage
+          fail-on-error: false # need to enable code security on this repo
