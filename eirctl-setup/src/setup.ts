@@ -158,7 +158,7 @@ const downloadBinary = async (config: SetupConfig): Promise<void> => {
         debug(getErrorMessage(ex))
         throw new Error("unable to make executable: " + pathToBin)
     })
-    if (config.version != "latest" && config.sha256 != "") {
+    if (config.sha256 !== "") {
         await verifyChecksum(config, target)
     }
     addPath(dirname(target))

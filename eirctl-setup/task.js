@@ -22632,7 +22632,7 @@ var downloadBinary = async (config) => {
     debug((0, import_utils4.getErrorMessage)(ex));
     throw new Error("unable to make executable: " + pathToBin);
   });
-  if (config.version != "latest" && config.sha256 != "") {
+  if (config.sha256 !== "") {
     await verifyChecksum(config, target);
   }
   addPath((0, import_path.dirname)(target));

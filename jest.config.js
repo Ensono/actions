@@ -23,6 +23,7 @@ module.exports = {
   collectCoverageFrom: ["<rootDir>/src/**/*.ts"],
   coverageReporters: ["json"],
   coverageDirectory: "<rootDir>/.coverage",
+  reporters: ["default", ["jest-junit", { outputDirectory: "<rootDir>/.coverage", outputName: "junit.xml" }]],
   coverageThreshold: {
     global: {
       statements: 100,

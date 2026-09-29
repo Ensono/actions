@@ -10,7 +10,7 @@ permissions:
   checks: write
   contents: read
   pull-requests: write
-  security-events: write
+  code-quality: write
 
 jobs:
   actions-builder:
@@ -62,4 +62,4 @@ jobs:
           file: '.coverage/cobertura-coverage.xml'
           language: js
           label: actions-coverage
-          fail-on-error: false # need to enable code security on this repo
+          fail-on-error: false # Coverage upload is best-effort.

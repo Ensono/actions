@@ -222,6 +222,16 @@ describe("eirctl setup", () => {
         }
     )
 
+    test("stable latest without a checksum skips verification", async () => {
+        mockGetInput.mockReturnValueOnce("latest")
+        mockGetBooleanInput.mockReturnValueOnce(false)
+        mockGetInput.mockReturnValueOnce("")
+
+        await expect(runAction()).resolves.toBeUndefined()
+        expect(mockFs.readFile).not.toHaveBeenCalled()
+        expect(mockAddPath).toHaveBeenCalledWith("/tmp")
+    })
+
     // negative test cases
     test("fails on prerelease REST call", async () => {
         // Arrange
@@ -443,7 +453,8 @@ describe("eirctl setup", () => {
 
     test.each([
         ["sha256:incorrecthash", "v.123.434", false],
-        ["incorrecthash","v.123.434", true],
+        ["incorrecthash", "v.123.434", true],
+        ["incorrecthash", "latest", false],
     ])("verifyChecksum fails on incorrect SHA (%s) on version %s with isPrerelease set to %s", 
         async (sha, version, isPrerelease) => {
         // Arrange

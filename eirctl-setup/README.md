@@ -8,5 +8,4 @@ Example usage:
   - uses: ensono/actions/eirctl-setup@v0.3.1
     with: 
       version: latest
-      isPrerelease: true
 ```
