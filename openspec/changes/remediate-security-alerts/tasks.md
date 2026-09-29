@@ -45,7 +45,7 @@
 
 - [x] 7.1 Run `pre-commit run --all-files` if configured, and review the full diff (no pre-commit configuration present)
 - [x] 7.2 Commit with a signed conventional commit and push to `fix/update-actions` (PR #7); prompt the user to retry if GPG signing fails
-- [ ] 7.3 Confirm the PR workflow's build-integrity, test, and coverage steps pass
+- [x] 7.3 Confirm the PR workflow's build-integrity, test, and coverage steps pass
 
 ## 8. Post-merge verification
 
