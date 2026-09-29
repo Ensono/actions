@@ -47,11 +47,15 @@ Run with npm's `pnpm@12.6.0` executable (CI also installs 12.6.0; `engines.pnpm`
 
 **Unverified Dependabot compatibility:** the same GitHub reference currently lists pnpm support through v10, while this repository uses pnpm 12.6.0. Declaring `engines.pnpm` and validating YAML cannot demonstrate that hosted Dependabot resolves pnpm 12 or updates this lockfile. Inspect the first live npm update run and its log after merging; investigate manager mismatches or `security_update_not_possible` rather than assuming the configuration fixes them.
 
-## CodeQL triage (not a dismissal)
+## CodeQL triage
 
-Three `js/weak-cryptographic-algorithm` alerts concern bundled Undici WebSocket code. Offline inspection of the three bundles finds the fixed public RFC 6455 GUID `258EAFA5-E914-47DA-95CA-C5AB0DC85B11` and a handshake check computing `crypto.createHash("sha1").update(keyValue + uid).digest("base64")` for `Sec-WebSocket-Accept`. The SHA-1 input here is protocol handshake material, **not secret data**; RFC 6455 requires SHA-1. Substituting SHA-256 would break protocol conformance and is rejected.
+Three `js/weak-cryptographic-algorithm` alerts concern bundled Undici WebSocket code. For [#4](https://github.com/Ensono/actions/security/code-scanning/4) (`playground-echo/task.js:16673`), [#5](https://github.com/Ensono/actions/security/code-scanning/5) (`eirctl-setup/task.js:16675`), and [#6](https://github.com/Ensono/actions/security/code-scanning/6) (`process-json/task.js:16675`), the GitHub API alert instances point to the same handshake check: `crypto.createHash("sha1").update(keyValue + uid).digest("base64")` for `Sec-WebSocket-Accept`. Inspection of each corresponding file on `main` via `gh api` confirmed that `uid` is the fixed public RFC 6455 GUID `258EAFA5-E914-47DA-95CA-C5AB0DC85B11`. This is protocol handshake material, **not secret data**; RFC 6455 requires SHA-1. Substituting SHA-256 would break protocol conformance and is rejected.
 
-**Do not dismiss any of the three alerts until each individual trace has been reviewed in the GitHub UI** and confirmed to reach this handshake path. Only then dismiss each as a false positive with this specific reason in the dismissal comment. If any trace differs, keep that alert open and investigate; mirror the actual dismissal outcome here.
+On 2026-09-29, the maintainer explicitly authorized an exception to the planned full GitHub UI trace review for these **three specific alerts**, accepting the `gh` alert-instance locations and inspected `main` source instead. Full UI traces were **not** reviewed; the GitHub API did not provide them. Alerts #4, #5, and #6 were each dismissed using `gh api` as `false positive`, verified by a subsequent GET (dismissed at 09:57:39Z, 09:57:40Z, and 09:57:41Z respectively), with this same comment:
+
+> False positive: Undici's RFC 6455 WebSocket handshake requires SHA-1 over Sec-WebSocket-Key + public GUID 258EAFA5-E914-47DA-95CA-C5AB0DC85B11 for Sec-WebSocket-Accept. Not a secret; SHA-256 would break the protocol. Verified on main.
+
+Do not generalize this exception to other alerts. If a later trace or rerun identifies a different path, reopen and investigate it.
 
 ## After merge (pending)
 

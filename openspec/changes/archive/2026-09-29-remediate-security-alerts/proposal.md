@@ -11,8 +11,8 @@
 - Rebuild the checked-in `task.js` bundles and keep the existing PR-workflow integrity check green.
 - Harden workflows: give `.github/workflows/tester.yml` jobs `contents: read` (closing CodeQL `actions/missing-workflow-permissions` alerts #1–3), drop its empty `env: {}` map, fix the unterminated quotes in `release.yml`, and clear the shellcheck style warnings in `pr.yml` so `actionlint` passes repo-wide.
 - Add `.github/dependabot.yml`: weekly npm and GitHub Actions updates, npm runtime and development **version** updates grouped separately from **security** updates, grouped Actions updates, and a five-day cooldown that applies to version updates only (GitHub does not apply cooldown to security updates, and immediate security updates are the deliberate choice).
-- Document the triage decision for CodeQL `js/weak-cryptographic-algorithm` alerts #4–6: bundled Undici computes the RFC 6455 WebSocket handshake SHA-1 over the fixed public GUID `258EAFA5-E914-47DA-95CA-C5AB0DC85B11`, not secret data. Dismiss as false positives **only after** inspecting each trace in the GitHub UI; do not substitute SHA-256.
-- Verify post-merge that alerts close on `main` and retry any still-failing security-update jobs.
+- Document the triage decision for CodeQL `js/weak-cryptographic-algorithm` alerts #4–6: bundled Undici computes the RFC 6455 WebSocket handshake SHA-1 over the key plus fixed public GUID `258EAFA5-E914-47DA-95CA-C5AB0DC85B11`, not secret data. The maintainer explicitly approved using `gh` alert-instance locations and the corresponding `main` code in place of full UI traces for these three alerts; each was dismissed as a false positive with the reason recorded. Do not substitute SHA-256.
+- Leave post-merge alert closure and security-update retry checks explicitly pending in `SECURITY-REMEDIATION.md`; these merge-dependent operations are outside this change's completion checklist.
 
 ## Capabilities
 

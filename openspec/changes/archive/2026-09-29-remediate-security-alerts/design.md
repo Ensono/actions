@@ -21,7 +21,8 @@ Constraints:
 **Non-Goals:**
 - Changing any action's public interface (`action.yml` inputs/outputs) or runtime behaviour.
 - Replacing the WebSocket handshake SHA-1 inside bundled Undici.
-- Dismissing the three `js/weak-cryptographic-algorithm` alerts as part of this change; only the documented justification is produced here.
+- Treating unreviewed full UI traces as reviewed; alerts #4–6 were instead dismissed under an explicitly approved, narrowly scoped `gh` evidence exception.
+- Completing post-merge scanner verification and security-update retries before archiving this implementation change.
 - Introducing a permanent repository-wide minimum-release-age policy.
 - Reworking the release/versioning pipeline beyond the quoting fix.
 
@@ -51,17 +52,17 @@ Dependabot picks its npm-manager behaviour from repository metadata; declaring `
 **8. `actionlint` is the workflow gate.**
 Running it repo-wide (not just on the changed file) surfaced the unterminated quotes in `release.yml`'s `Set Version` step — a latent runtime failure — and shellcheck style warnings in `pr.yml`. Fix rather than suppress.
 
-**9. CodeQL triage is documented now, executed in the GitHub UI later.**
-The analysis (SHA-1 over the fixed public RFC 6455 GUID, not secret data) is recorded, but the dismissal itself requires inspecting each alert trace in the UI, which cannot be done from the checkout.
+**9. A maintainer-approved exception allows `gh` evidence for CodeQL alerts #4–6.**
+Ordinarily a full UI trace is reviewed before dismissing a scanner alert. For these three alerts only, the maintainer expressly accepted `gh` alert-instance locations plus inspection of the corresponding `main` bundle code showing SHA-1 over the WebSocket key and fixed public RFC 6455 GUID. The full UI traces were not reviewed; this limitation and the false-positive dismissal comments are recorded in `SECURITY-REMEDIATION.md`. Other alerts still require their own evidence and review.
 
 ## Risks / Trade-offs
 
 - **Regenerated lockfile changes many transitive versions at once → ** run `pnpm run build`, `pnpm test`, and `pnpm run test:merge` before commit; the PR build-integrity check plus 46 existing tests are the regression net.
 - **Rebuilt bundles could differ from what was reviewed → ** commit lockfile and bundles in the same commit and let the CI integrity check prove reproducibility.
 - **Immediate security updates can land a <5-day-old release → ** accepted deliberately: exposure to a known CVE is judged worse than exposure to a fresh release; grouped security PRs still pass the full build and test suite before merge.
-- **CodeQL/Dependabot cannot be verified locally → ** treat post-merge alert confirmation as a required task, not a formality, and record what remains open.
-- **Dismissing the three WebSocket alerts without trace review would hide a real finding → ** the specs forbid dismissal before UI review; this change only supplies the justification text.
-- **Config alone may not rescue previously unresolvable security-update runs → ** explicitly plan to retry the failed runs and triage the remaining `security_update_not_possible` cases individually.
+- **CodeQL/Dependabot closure cannot be verified before merge → ** record post-merge confirmation as outstanding operational work in `SECURITY-REMEDIATION.md`; archiving this implementation change is not evidence of scanner closure.
+- **Full UI traces were not reviewed for the three WebSocket alerts → ** the approved `gh`-based exception is limited to those exact alert locations, with inspected `main` source and a written dismissal reason; reopen any alert if later evidence differs.
+- **Config alone may not rescue previously unresolvable security-update runs → ** security-update retries and triage of `security_update_not_possible` remain outstanding after merge.
 - **`tester.yml` pins `actions/checkout@v4` by tag → ** SHA-pin it with this change to match the rest of the repository; low risk, but it is a behaviour change to a workflow that runs on `main` pushes.
 
 ## Migration Plan
@@ -71,7 +72,7 @@ The analysis (SHA-1 over the fixed public RFC 6455 GUID, not secret data) is rec
 3. Apply workflow permission/lint fixes and run `actionlint` repo-wide.
 4. Add `.github/dependabot.yml` and `SECURITY-REMEDIATION.md`.
 5. Commit (signed) and push to `fix/update-actions`; let PR #7's checks run.
-6. After merge, confirm alert closure on `main`, triage the three CodeQL false positives in the UI, and retry failed security-update runs.
+6. Dismiss CodeQL alerts #4–6 with the approved `gh` evidence and record the exception and comments. After merge, confirm alert closure on `main` and retry failed security-update runs as outstanding operational checks outside this change's completion checklist.
 
 Rollback: the change is additive configuration plus a lockfile bump; reverting the merge commit restores the previous dependency graph, at the cost of reopening the alerts.
 
@@ -79,4 +80,4 @@ Rollback: the change is additive configuration plus a lockfile bump; reverting t
 
 - Should the release-age policy eventually be enforced mechanically (for example a CI check on direct dependency ages) instead of relying on reviewer discipline?
 - Should `tester.yml` be narrowed further, or moved off `push: main` to reduce its blast radius?
-- Do any of the three `js/weak-cryptographic-algorithm` traces reach code paths outside the Undici handshake? Resolvable only by inspecting them in the GitHub UI.
+- If later full UI trace review finds any of the dismissed alerts reaches a path outside the inspected Undici handshake, reopen and investigate it.

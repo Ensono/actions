@@ -39,7 +39,7 @@
 
 - [x] 6.1 Write `SECURITY-REMEDIATION.md` covering the version-selection policy, the documented exceptions, and the verification evidence produced in sections 2–5
 - [x] 6.2 Record the `js/weak-cryptographic-algorithm` justification: SHA-1 over the fixed public RFC 6455 GUID `258EAFA5-E914-47DA-95CA-C5AB0DC85B11` in bundled Undici, not secret data; SHA-256 substitution is rejected
-- [x] 6.3 State explicitly in the record that the three CodeQL alerts must not be dismissed until each trace is reviewed in the GitHub UI
+- [x] 6.3 Record the UI-trace review policy and the maintainer-approved `gh` evidence exception for alerts #4–6
 
 ## 7. Delivery
 
@@ -47,9 +47,6 @@
 - [x] 7.2 Commit with a signed conventional commit and push to `fix/update-actions` (PR #7); prompt the user to retry if GPG signing fails
 - [x] 7.3 Confirm the PR workflow's build-integrity, test, and coverage steps pass
 
-## 8. Post-merge verification
+## 8. CodeQL triage
 
-- [ ] 8.1 After merge, re-check Dependabot alerts on `main` and record which of the 30 closed and which remain
-- [ ] 8.2 Review each of the three `js/weak-cryptographic-algorithm` traces in the GitHub UI and dismiss as false positive with the recorded reason only if the trace confirms the handshake path
-- [ ] 8.3 Confirm CodeQL closes the three `actions/missing-workflow-permissions` alerts
-- [ ] 8.4 Retry the previously failed Dependabot security-update runs and record outcomes; raise follow-ups for any still reporting `security_update_not_possible`
+- [x] 8.1 Confirm the `js/weak-cryptographic-algorithm` locations and fixed GUID in each `main` bundle using `gh`; dismiss alerts #4–6 as false positives with the recorded RFC 6455 reason under the maintainer-approved exception to UI trace review (verified 2026-09-29)
