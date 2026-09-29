@@ -33,8 +33,8 @@ jobs:
           pnpm i
           pnpm run build
           git status --porcelain --untracked-files=no
-          if [ ! -z "$(git status --porcelain --untracked-files=no)" ]; then
-            if [ ! -z ${CI+x} ] ; then
+          if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
+            if [ -n "${CI+x}" ]; then
               echo "In CI with an unclean tree - exiting"
               echo "Info: make sure you have run pnpm run build locally and committed"
               exit 1

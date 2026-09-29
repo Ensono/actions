@@ -36,7 +36,7 @@ jobs:
       - name: Set Version
         run: |
           echo "REVISION  -> $GITHUB_SHA"
-          echo "VERSION -> v${{ steps.gitversion.outputs.semVer }}
-          echo "MAJOR -> v${{ steps.gitversion.outputs.major }}
-          git tag -a v${{ steps.gitversion.outputs.semVer }} -m "ci tag release semver" $GITHUB_SHA
+          echo "VERSION -> v${{ steps.gitversion.outputs.semVer }}"
+          echo "MAJOR -> v${{ steps.gitversion.outputs.major }}"
+          git tag -a "v${{ steps.gitversion.outputs.semVer }}" -m "ci tag release semver" "$GITHUB_SHA"
           git push origin v${{ steps.gitversion.outputs.semVer }}

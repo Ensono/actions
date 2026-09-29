@@ -6,14 +6,16 @@ on:
     - main
     - feat/*
 
+permissions:
+  contents: read
+
 jobs:
   process-json: 
     runs-on: ubuntu-latest
-    env: {}       
     outputs:
       complex2Level__key1__c2l_key1: ${{ steps.publishedJson.outputs.complex2Level__key1__c2l_key1 }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     - uses: ensono/actions/tasks/process-json@v0.2.1
       id: publishedJson
       with: 
@@ -28,7 +30,7 @@ jobs:
   eirctl-setup:
       runs-on: ubuntu-latest
       steps:
-        - uses: actions/checkout@v4
+        - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         - uses: ./eirctl-setup
           id: eirctlsetup
           with: 
@@ -42,7 +44,7 @@ jobs:
       - process-json
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: output across jobs
         run: |
           echo "complex2Level__key1__c2l_key1: ${{ needs.process-json.outputs.complex2Level__key1__c2l_key1 }}"
