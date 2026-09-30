@@ -1,9 +1,12 @@
 {
     "compilerOptions": {
-        "baseUrl": "<rootDir>/src",
+        // "baseUrl": "<rootDir>/src",
+        "module": "nodenext",
+        "target": "es2025",
         "outDir": "<rootDir>/dist",
         "esModuleInterop": true,
-        "declaration": true
+        "declaration": true,
+        "types": ["node", "jest"]
     },
     "exclude": [
         "node_modules",

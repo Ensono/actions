@@ -1,6 +1,10 @@
 packages:
   # - ".github/actions/**"
-  - "**/**"
+  - "**"
   - "!.github/"
   - "!.taskctl/"
 
+allowBuilds:
+  '@parcel/watcher': false
+  esbuild: true
+  unrs-resolver: false

@@ -2,15 +2,22 @@ const libReport = require('istanbul-lib-report')
 const { createCoverageMap, createFileCoverage } = require('istanbul-lib-coverage')
 const reports = require('istanbul-reports')
 const mergedRaw = require('./.combined-raw.json')
+const path = require('node:path')
 
 let map = createCoverageMap()
 
 for (const fk of Object.keys(mergedRaw)) {
-  console.log('fk :>> ', fk);
-  const reportKey = fk.includes("/libs/") ? fk.split("/libs/")[1] : fk.split("/actions/")[1] //.split("/")[0]
-  console.log('reportKey :>> ', reportKey);
-  const jsonCoverageMap =  createCoverageMap({[reportKey]: createFileCoverage(mergedRaw[fk])});
-  map.merge(jsonCoverageMap);
+  const fileMarker = '/file:'
+  const markerIndex = fk.lastIndexOf(fileMarker)
+  const sourcePath =
+    markerIndex >= 0 ? fk.slice(markerIndex + fileMarker.length) : fk
+  const reportKey = path.relative(__dirname, path.resolve(sourcePath))
+
+  const coverage = createFileCoverage({
+    ...mergedRaw[fk],
+    path: reportKey,
+  })
+  map.merge(createCoverageMap({ [reportKey]: coverage }))
 }
 
 // create a context for report generation
@@ -18,7 +25,7 @@ const context = libReport.createContext({
   dir: './.coverage',
   defaultSummarizer: "nested",
   coverageMap: map, //.files().forEach((f) => )
-// this is the map which we generated in above snippet
+  // this is the map which we generated in above snippet
 })
 
 // create an instance of the relevant report class, passing the

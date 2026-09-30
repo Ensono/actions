@@ -52,3 +52,7 @@ dev-dist
 # Env
 .env
 
+# Agents
+.github/prompts/opsx-*
+.github/skills/openspec-*
+.pi/

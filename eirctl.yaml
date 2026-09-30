@@ -1,0 +1,6 @@
+contexts:
+  node24:
+    container:
+      name: mirror.gcr.io/node:24-trixie
+      pull_timeout: 0
+      entrypoint: /usr/bin/env

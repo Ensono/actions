@@ -1,13 +1,11 @@
 # eirctl setup
 
-Sets up the eirctl binary to use in pipelines.
+Sets up the [eirctl](https://github.com/Ensono/eirctl) binary to use in pipelines.
 
 Example usage:
 
-```
-  # - uses: ensono/actions/eirctl-setup@v0
-  - uses: ensono/actions/eirctl-setup@v0.3.0
+```yaml
+  - uses: ensono/actions/eirctl-setup@v0.3.1
     with: 
       version: latest
-      isPrerelease: true
 ```

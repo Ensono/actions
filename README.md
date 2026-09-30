@@ -50,8 +50,8 @@ pnpm run build
 
 ## Current tasks
 
-- process-json
-- taskctl-setup
+- [process-json](./process-json/README.md)
+- [eirctl-setup](./eirctl-setup/README.md)
 
 ## Adding a Task
 

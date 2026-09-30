@@ -7,6 +7,6 @@ import { debug, setFailed } from "@actions/core"
 /* istanbul ignore next */ 
 import { runAction } from "./setup"
 /* istanbul ignore next */ 
-(async () => runAction()
+(async () => await runAction()
 .then((d) => debug(`eirctl downloaded and ready to use`))
 .catch((ex) => setFailed(ex?.message)))()

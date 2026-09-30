@@ -1,0 +1,36 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    # Cooldown only affects version updates; GitHub does not apply it to security
+    # updates. Immediate security updates are intentional.
+    cooldown:
+      default-days: 5
+    groups:
+      runtime-versions:
+        applies-to: version-updates
+        dependency-type: production
+        patterns:
+          - "*"
+      development-versions:
+        applies-to: version-updates
+        dependency-type: development
+        patterns:
+          - "*"
+      security-updates:
+        applies-to: security-updates
+        patterns:
+          - "*"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 5
+    groups:
+      actions-versions:
+        patterns:
+          - "*"

@@ -1,101 +1,100 @@
-jest.mock("os")
-jest.mock("fs/promises")
-// actions write to stdout silence here
-global.process.stdout.write = jest.fn(() => true)
+import {
+    afterEach,
+    beforeEach,
+    describe,
+    expect,
+    jest,
+    test
+} from "@jest/globals"
 
-import * as mockSrv from "@actions/core"
-import * as mockIO from "@actions/io"
-import * as mockTools from "@actions/tool-cache"
-import { OutgoingHttpHeaders } from "http"
-import { join } from "path"
-import { env } from "process"
-import { runAction } from "./setup"
+import type { InputOptions } from "@actions/core"
+import type { MoveOptions } from "@actions/io"
+import { Buffer } from "node:buffer"
+import type { OutgoingHttpHeaders } from "node:http"
+import { join } from "node:path"
+import process, { env } from "node:process"
 
-// need to use require here to ensure it can be overridden
-const os = require("os")
-const fs = require("fs/promises")
+const mockAddPath = jest.fn<(inputPath: string) => void>()
+const mockDebug = jest.fn<(message: string) => void>()
+const mockError = jest.fn<(message: string) => void>()
+const mockGetInput = jest.fn<(name: string, options?: InputOptions | undefined) => string>()
+const mockGetBooleanInput = jest.fn<(name: string, options?: InputOptions | undefined) => boolean>()
+const mockDownload = jest.fn<(url: string, dest?: string | undefined, auth?: string | undefined, headers?: OutgoingHttpHeaders | undefined) => Promise<string>>()
+const mockMV = jest.fn<(source: string, dest: string, options?: MoveOptions | undefined) => Promise<void>>()
+const mockFetch = jest.fn<(input: string | URL | Request, init?: RequestInit | undefined) => Promise<Response>>()
+
+jest.unstable_mockModule("@actions/core", () => ({
+    addPath: mockAddPath,
+    debug: mockDebug,
+    error: mockError,
+    getInput: mockGetInput,
+    getBooleanInput: mockGetBooleanInput,
+}))
+
+jest.unstable_mockModule("@actions/tool-cache", () => ({
+    downloadTool: mockDownload,
+}))
+
+jest.unstable_mockModule("@actions/io", () => ({
+    mv: mockMV,
+}))
+
+const mockOs = {
+    arch: jest.fn<() => string>(),
+    platform: jest.fn<() => string>(),
+}
+
+const mockFs = {
+    chmod: jest.fn<(path: string, mode: number) => Promise<void>>(),
+    readFile: jest.fn<(path: string) => Promise<Buffer>>(),
+}
+
+jest.unstable_mockModule("os", () => mockOs)
+jest.unstable_mockModule("fs/promises", () => mockFs)
+
+process.stdout.write = jest.fn(() => true)
+
+const { runAction } = await import("./setup.ts")
 
 describe("eirctl setup", () => {
-    let mockDebug: jest.SpyInstance<void, [message: string], any>
-    let mockError: jest.SpyInstance<
-        void,
-        [message: string | Error, properties?: mockSrv.AnnotationProperties],
-        any
-    >
-    let mockGetInput: jest.SpyInstance<
-        string,
-        [name: string, options?: mockSrv.InputOptions],
-        any
-    >
-    let mockGetBooleanInput: jest.SpyInstance<
-        boolean,
-        [name: string, options?: mockSrv.InputOptions],
-        any
-    >
-    let mockDownload: jest.SpyInstance<
-        Promise<string>,
-        [
-            url: string,
-            dest?: string | undefined,
-            auth?: string | undefined,
-            headers?: OutgoingHttpHeaders | undefined
-        ],
-        any
-    >
-    let mockMV: jest.SpyInstance<
-        Promise<void>,
-        [
-            source: string,
-            dest: string,
-            options?: mockIO.MoveOptions | undefined
-        ],
-        any
-    >
-    let mockFetch: jest.SpyInstance<
-        Promise<Response>,
-        [input: RequestInfo | URL, init?: RequestInit | undefined],
-        any
-    >
     let tmpRunnerDir: string
 
     beforeEach(() => {
-        mockDebug = jest.spyOn(mockSrv, "debug").mockImplementation(() => {})
-        mockError = jest.spyOn(mockSrv, "error").mockImplementation(() => {})
-        mockGetInput = jest
-            .spyOn(mockSrv, "getInput")
-            .mockImplementation(() => {
-                throw new Error("Not Mocked")
-            })
-        mockGetBooleanInput = jest
-            .spyOn(mockSrv, "getBooleanInput")
-            .mockImplementation(() => {
-                throw new Error("Not Mocked")
-            })
-        mockDownload = jest
-            .spyOn(mockTools, "downloadTool")
-            .mockImplementation(async () => {
-                throw new Error("Not Mocked")
-            })
-        mockMV = jest.spyOn(mockIO, "mv").mockImplementation(async () => {
-            throw new Error("Not Mocked")
-        })
-        mockFetch = jest.spyOn(global, "fetch").mockImplementation(async () => {
-            throw new Error("Not Mocked")
-        })
+        jest.clearAllMocks()
+
+        mockFs.chmod.mockResolvedValue(undefined)
+        mockFs.readFile.mockResolvedValue(Buffer.from("mock eirctl binary"))
+        mockOs.platform.mockReturnValue("darwin")
+        mockOs.arch.mockReturnValue("x64")
+
+        mockDebug.mockReturnValue()
+        mockError.mockImplementation(() => { })
+        mockGetInput.mockReturnValue("latest")
+        mockGetBooleanInput.mockReturnValue(false)
+        mockDownload.mockResolvedValue("/tmp/eirctl")
+        mockMV.mockResolvedValue(undefined)
+        jest.spyOn(globalThis, "fetch").mockImplementation(mockFetch)
 
         // local vs GHA run unit tests
         tmpRunnerDir =
-            env.RUNNER_TEMP || (env.TMPDIR?.replace(/\/$/, "") as string)
+            env.RUNNER_TEMP || "/some/download/dir" as string
         env.RUNNER_TEMP = tmpRunnerDir
     })
 
     afterEach(async () => {
+        jest.restoreAllMocks()
+        jest.clearAllMocks()
+        mockAddPath.mockClear()
         mockGetInput.mockClear()
         mockGetBooleanInput.mockClear()
         mockDebug.mockClear()
         mockError.mockClear()
         mockDownload.mockClear()
-        // mockFs.mockClear()
+        mockMV.mockClear()
+        mockFs.chmod.mockClear()
+        mockOs.arch.mockClear()
+        mockOs.platform.mockClear()
+        mockFetch.mockClear()
     })
 
     test.each([
@@ -117,17 +116,15 @@ describe("eirctl setup", () => {
             mockGetInput.mockReturnValueOnce(version)
             // isPre
             mockGetBooleanInput.mockReturnValueOnce(false)
+            // sha256 input
+            mockGetInput.mockReturnValueOnce("9a6c5519468cba5e5dd6a28c9fb19a3f2e4f756e7b4ee343099976318cc47955")
             let tmpName = `random-${new Date().valueOf()}`
-            mockDownload.mockImplementationOnce(async () => {
-                return join(tmpRunnerDir, tmpName)
-            })
-            mockMV.mockImplementationOnce(async () => {
-                return
-            })
+            mockDownload.mockResolvedValueOnce(join(tmpRunnerDir, tmpName))
+            mockMV.mockResolvedValueOnce(undefined)
 
-            fs.chmod = jest.fn(async() => {})
-            os.platform = jest.fn().mockReturnValue(osPlatform)
-            os.arch = jest.fn().mockReturnValue(osArch)
+            mockFs.chmod.mockResolvedValue(undefined)
+            mockOs.platform.mockReturnValue(osPlatform)
+            mockOs.arch.mockReturnValue(osArch)
 
             let err = null
             // Act
@@ -137,7 +134,7 @@ describe("eirctl setup", () => {
             // Assert
             expect(err).toBe(null)
             // ensure we have added the install location to the path
-            expect(env?.PATH?.split(":")).toContain(tmpRunnerDir)
+            expect(mockAddPath).toHaveBeenCalledWith(tmpRunnerDir)
             expect(mockDownload).toHaveBeenCalledWith(
                 `https://github.com/Ensono/eirctl/releases/${expectString}`
             )
@@ -162,54 +159,52 @@ describe("eirctl setup", () => {
             mockGetInput.mockReturnValueOnce(version)
             // isPre
             mockGetBooleanInput.mockReturnValueOnce(true)
+            // sha256 input
+            mockGetInput.mockReturnValueOnce("9a6c5519468cba5e5dd6a28c9fb19a3f2e4f756e7b4ee343099976318cc47955")
+
             let tmpName = `random-${new Date().valueOf()}`
 
-            mockDownload.mockImplementationOnce(async () => {
-                return join(tmpRunnerDir, tmpName)
-            })
-            mockMV.mockImplementationOnce(async () => {
-                return
-            })
+            mockDownload.mockResolvedValueOnce(join(tmpRunnerDir, tmpName))
+            mockMV.mockResolvedValueOnce()
 
-            fs.chmod = jest.fn(async() => {})
-            os.platform = jest.fn().mockReturnValue(osPlatform)
-            os.arch = jest.fn().mockReturnValue(osArch)
+            mockFs.chmod.mockResolvedValue(undefined)
+            mockOs.platform.mockReturnValue(osPlatform)
+            mockOs.arch.mockReturnValue(osArch)
 
-            mockFetch.mockImplementationOnce(async () => {
-                return {
-                    ...{} as Response,
-                    json: async () => { return [
-                            {
-                                tag_name: "1.7.1",
-                                target_commitish: "master",
-                                name: "1.7.1",
-                                draft: false,
-                                prerelease: false,
-                            },
-                            {
-                                tag_name: "1.8.0",
-                                target_commitish: "master",
-                                name: "1.8.0",
-                                draft: false,
-                                prerelease: true,
-                            },
-                            {
-                                tag_name: "1.8.1",
-                                target_commitish: "master",
-                                name: "1.8.1",
-                                draft: false,
-                                prerelease: false,
-                            },
-                            {
-                                tag_name: version,
-                                target_commitish: "master",
-                                name: version,
-                                draft: false,
-                                prerelease: true,
-                            },
-                        ]
-                    },
-                }
+            mockFetch.mockResolvedValueOnce({
+                ...{} as Response,
+                json: async () => {
+                    return [
+                        {
+                            tag_name: "1.7.1",
+                            target_commitish: "master",
+                            name: "1.7.1",
+                            draft: false,
+                            prerelease: false,
+                        },
+                        {
+                            tag_name: "1.8.0",
+                            target_commitish: "master",
+                            name: "1.8.0",
+                            draft: false,
+                            prerelease: true,
+                        },
+                        {
+                            tag_name: "1.8.1",
+                            target_commitish: "master",
+                            name: "1.8.1",
+                            draft: false,
+                            prerelease: false,
+                        },
+                        {
+                            tag_name: version,
+                            target_commitish: "master",
+                            name: version,
+                            draft: false,
+                            prerelease: true,
+                        },
+                    ]
+                },
             })
 
             let err = null
@@ -220,12 +215,22 @@ describe("eirctl setup", () => {
             // Assert
             expect(err).toBe(null)
             // ensure we have added the install location to the path
-            expect(env?.PATH?.split(":")).toContain(tmpRunnerDir)
+            expect(mockAddPath).toHaveBeenCalledWith(tmpRunnerDir)
             expect(mockDownload).toHaveBeenCalledWith(
                 `https://github.com/Ensono/eirctl/releases/${expectString}`
             )
         }
     )
+
+    test("stable latest without a checksum skips verification", async () => {
+        mockGetInput.mockReturnValueOnce("latest")
+        mockGetBooleanInput.mockReturnValueOnce(false)
+        mockGetInput.mockReturnValueOnce("")
+
+        await expect(runAction()).resolves.toBeUndefined()
+        expect(mockFs.readFile).not.toHaveBeenCalled()
+        expect(mockAddPath).toHaveBeenCalledWith("/tmp")
+    })
 
     // negative test cases
     test("fails on prerelease REST call", async () => {
@@ -237,8 +242,8 @@ describe("eirctl setup", () => {
             throw new Error("mocked err")
         })
 
-        os.platform = jest.fn().mockReturnValue("foo")
-        os.arch = jest.fn().mockReturnValue("bar")
+        mockOs.platform.mockReturnValue("foo")
+        mockOs.arch.mockReturnValue("bar")
         let err = null
         // Act
         await runAction().catch((ex) => {
@@ -256,30 +261,32 @@ describe("eirctl setup", () => {
         mockGetInput.mockReturnValueOnce("latest")
         // isPre
         mockGetBooleanInput.mockReturnValueOnce(true)
-        mockFetch.mockImplementationOnce(async () => {
-            return {
-                ...{} as Response,
-                json: async () => { return [
-                        {
-                            tag_name: "1.7.1",
-                            target_commitish: "master",
-                            name: "1.7.1",
-                            draft: false,
-                            prerelease: false,
-                        },
-                        {
-                            tag_name: "1.8.1",
-                            target_commitish: "master",
-                            name: "1.8.1",
-                            draft: false,
-                            prerelease: false,
-                        },
-                    ]
-                },
-            }
+        // sha256 input
+        mockGetInput.mockReturnValueOnce("sha256:9a6c5519468cba5e5dd6a28c9fb19a3f2e4f756e7b4ee343099976318cc47955")
+
+        mockFetch.mockResolvedValueOnce({
+            ...{} as Response,
+            json: async () => {
+                return [
+                    {
+                        tag_name: "1.7.1",
+                        target_commitish: "master",
+                        name: "1.7.1",
+                        draft: false,
+                        prerelease: false,
+                    },
+                    {
+                        tag_name: "1.8.1",
+                        target_commitish: "master",
+                        name: "1.8.1",
+                        draft: false,
+                        prerelease: false,
+                    },
+                ]
+            },
         })
-        os.platform = jest.fn().mockReturnValue("foo")
-        os.arch = jest.fn().mockReturnValue("bar")
+        mockOs.platform.mockReturnValue("foo")
+        mockOs.arch.mockReturnValue("bar")
         let err = null
         // Act
         await runAction().catch((ex) => {
@@ -289,7 +296,7 @@ describe("eirctl setup", () => {
         expect(err).not.toBe(null)
         if (err != null) {
             expect(err).toBeInstanceOf(Error)
-            expect((err as Error)?.message.startsWith("no prereleases found")).toBe(true)
+            expect((err as Error)?.message).toBe("no prereleases found")
         }
     })
 
@@ -298,30 +305,32 @@ describe("eirctl setup", () => {
         mockGetInput.mockReturnValueOnce("2.7.1")
         // isPre
         mockGetBooleanInput.mockReturnValueOnce(true)
-        mockFetch.mockImplementationOnce(async () => {
-            return {
-                ...{} as Response,
-                json: async () => { return [
-                        {
-                            tag_name: "1.7.1",
-                            target_commitish: "master",
-                            name: "1.7.1",
-                            draft: false,
-                            prerelease: true,
-                        },
-                        {
-                            tag_name: "1.8.1",
-                            target_commitish: "master",
-                            name: "1.8.1",
-                            draft: false,
-                            prerelease: true,
-                        },
-                    ]
-                },
-            }
+        // sha256 input
+        mockGetInput.mockReturnValueOnce("9a6c5519468cba5e5dd6a28c9fb19a3f2e4f756e7b4ee343099976318cc47955")
+
+        mockFetch.mockResolvedValueOnce({
+            ...{} as Response,
+            json: async () => {
+                return [
+                    {
+                        tag_name: "1.7.1",
+                        target_commitish: "master",
+                        name: "1.7.1",
+                        draft: false,
+                        prerelease: true,
+                    },
+                    {
+                        tag_name: "1.8.1",
+                        target_commitish: "master",
+                        name: "1.8.1",
+                        draft: false,
+                        prerelease: true,
+                    },
+                ]
+            },
         })
-        os.platform = jest.fn().mockReturnValue("foo")
-        os.arch = jest.fn().mockReturnValue("bar")
+        mockOs.platform.mockReturnValue("foo")
+        mockOs.arch.mockReturnValue("bar")
         let err = null
         // Act
         await runAction().catch((ex) => {
@@ -331,20 +340,18 @@ describe("eirctl setup", () => {
         expect(err).not.toBe(null)
         if (err != null) {
             expect(err).toBeInstanceOf(Error)
-            expect((err as Error)?.message.startsWith("no prereleases found at version 2.7.1")).toBe(true)
+            expect((err as Error)?.message).toBe("no prereleases found at version 2.7.1")
         }
     })
 
-    test("download tool fails", async() => {
+    test("download tool fails", async () => {
         // Arrange
         mockGetInput.mockReturnValueOnce("latest")
         // isPre
         mockGetBooleanInput.mockReturnValueOnce(false)
-        mockDownload.mockImplementationOnce(async () => {
-            throw new Error("mocked err")
-        })
-        os.platform = jest.fn().mockReturnValue("foo")
-        os.arch = jest.fn().mockReturnValue("bar")
+        mockDownload.mockRejectedValueOnce(new Error("mocked err"))
+        mockOs.platform.mockReturnValue("foo")
+        mockOs.arch.mockReturnValue("bar")
         let err = null
         // Act
         await runAction().catch((ex) => {
@@ -357,19 +364,17 @@ describe("eirctl setup", () => {
             expect((err as Error)?.message.startsWith("unable to download tool,")).toBe(true)
         }
     })
-    test("moving tool fails", async() => {
+    test("moving tool fails", async () => {
         // Arrange
         mockGetInput.mockReturnValueOnce("latest")
         // isPre
         mockGetBooleanInput.mockReturnValueOnce(false)
-        mockDownload.mockImplementationOnce(async () => {
-            return "/some/path/eirctl"
-        })
+        mockDownload.mockResolvedValueOnce("/some/path/eirctl")
 
-        fs.chmod = jest.fn(async() => {})
-
-        os.platform = jest.fn().mockReturnValue("foo")
-        os.arch = jest.fn().mockReturnValue("bar")
+        mockFs.chmod.mockResolvedValue()
+        mockMV.mockRejectedValue(new Error("mocked err"))
+        mockOs.platform.mockReturnValue("foo")
+        mockOs.arch.mockReturnValue("bar")
         let err = null
         // Act
         await runAction().catch((ex) => {
@@ -382,19 +387,16 @@ describe("eirctl setup", () => {
             expect((err as Error)?.message).toBe("unable to move bin: /some/path/eirctl")
         }
     })
-    test("chmod-ing tool fails", async() => {
+    test("chmod-ing tool fails", async () => {
         // Arrange
         mockGetInput.mockReturnValueOnce("latest")
         // isPre
         mockGetBooleanInput.mockReturnValueOnce(false)
-        mockDownload.mockImplementationOnce(async () => {
-            return "/some/path/eirctl"
-        })
-        mockMV.mockImplementationOnce(async () => {})
-        fs.chmod = jest.fn(async() => {throw new Error("mocked err")})
-
-        os.platform = jest.fn().mockReturnValue("foo")
-        os.arch = jest.fn().mockReturnValue("bar")
+        mockDownload.mockResolvedValueOnce("/some/path/eirctl")
+        mockMV.mockImplementationOnce(async () => { })
+        mockFs.chmod.mockRejectedValue(new Error("mocked err"))
+        mockOs.platform.mockReturnValue("foo")
+        mockOs.arch.mockReturnValue("bar")
         let err = null
         // Act
         await runAction().catch((ex) => {
@@ -406,5 +408,115 @@ describe("eirctl setup", () => {
             expect(err).toBeInstanceOf(Error)
             expect((err as Error)?.message).toBe("unable to make executable: /some/path/eirctl")
         }
+    })
+    test("runtime fail on missing SHA when version is set to non-latest", async () => {
+        // Arrange
+        mockGetInput.mockReturnValueOnce("v0.123.456")
+        mockGetBooleanInput.mockReturnValueOnce(false)
+        mockGetInput.mockReturnValueOnce("") // SHA256
+        let err = null
+        // Act
+        await runAction().catch((ex) => {
+            err = ex
+        })
+        // Assert
+        expect(err).not.toBe(null)
+        if (err != null) {
+            expect(err).toBeInstanceOf(Error)
+            expect((err as Error)?.message).toBe('The sha256 input is required when version is not latest.')
+        }
+    })
+    test.each([
+        // version,arc,os,expectUrl
+        ["latest"],
+        ["v1.0.2"],
+        ["v1.0.4-latest"],
+    ])(
+        "isPrerelease runtime fail on missing SHA when version is set (%s)",
+        async (version) => {
+            // Arrange
+            mockGetInput.mockReturnValueOnce(version)
+            mockGetBooleanInput.mockReturnValueOnce(true)
+            mockGetInput.mockReturnValueOnce("") // SHA256
+            let err = null
+            // Act
+            await runAction().catch((ex) => {
+                err = ex
+            })
+            // Assert
+            expect(err).not.toBe(null)
+            if (err != null) {
+                expect(err).toBeInstanceOf(Error)
+                expect((err as Error)?.message).toBe('The sha256 input is required when version is not latest.')
+            }
+        })
+
+    test.each([
+        ["sha256:incorrecthash", "v.123.434", false],
+        ["incorrecthash", "v.123.434", true],
+        ["incorrecthash", "latest", false],
+    ])("verifyChecksum fails on incorrect SHA (%s) on version %s with isPrerelease set to %s", 
+        async (sha, version, isPrerelease) => {
+        // Arrange
+        mockGetInput.mockReturnValueOnce(version)
+        // isPre
+        mockGetBooleanInput.mockReturnValueOnce(isPrerelease)
+        // sha256 input
+        mockGetInput.mockReturnValueOnce(sha)
+        let tmpName = `random-${new Date().valueOf()}`
+        mockDownload.mockResolvedValueOnce(join(tmpRunnerDir, tmpName))
+        mockMV.mockResolvedValueOnce(undefined)
+
+        mockFs.chmod.mockResolvedValue(undefined)
+        mockOs.platform.mockReturnValue("linux")
+        mockOs.arch.mockReturnValue("x64")
+            mockFetch.mockResolvedValueOnce({
+                ...{} as Response,
+                json: async () => {
+                    return [
+                        {
+                            tag_name: "1.7.1",
+                            target_commitish: "master",
+                            name: "1.7.1",
+                            draft: false,
+                            prerelease: false,
+                        },
+                        {
+                            tag_name: "1.8.0",
+                            target_commitish: "master",
+                            name: "1.8.0",
+                            draft: false,
+                            prerelease: true,
+                        },
+                        {
+                            tag_name: "1.8.1",
+                            target_commitish: "master",
+                            name: "1.8.1",
+                            draft: false,
+                            prerelease: false,
+                        },
+                        {
+                            tag_name: version,
+                            target_commitish: "master",
+                            name: version,
+                            draft: false,
+                            prerelease: true,
+                        },
+                    ]
+                },
+            })
+
+        let err = null
+        // Act
+        await runAction().catch((ex) => {
+            err = ex
+        })
+        // Assert
+        expect(mockAddPath).not.toHaveBeenCalled()
+        expect(err).not.toBe(null)
+            if (err != null) {
+                expect(err).toBeInstanceOf(Error)
+                expect((err as Error)?.message).toBe('checksum verification failed for ' + version)
+            }
     })
 })
