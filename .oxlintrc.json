@@ -1,0 +1,34 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "categories": {
+    "correctness": "error"
+  },
+  "plugins": [
+    "typescript",
+    "unicorn",
+    "oxc",
+    "jest"
+  ],
+  "env": {
+    "node": true
+  },
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/task.js",
+    "**/dist/**",
+    "**/build/**",
+    "**/.coverage/**",
+    "**/coverage/**"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "**/*.test.ts",
+        "**/.testEnv.js"
+      ],
+      "env": {
+        "jest": true
+      }
+    }
+  ]
+}

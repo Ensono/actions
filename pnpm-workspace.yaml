@@ -4,7 +4,13 @@ packages:
   - "!.github/"
   - "!.taskctl/"
 
+overrides:
+  # NYC only uses load(); v5 removes argparse 1 / vulnerable sprintf-js.
+  '@istanbuljs/load-nyc-config>js-yaml': 5.4.3
+
 allowBuilds:
+  # Native optional packages work without SWC's network-capable fallback hook.
+  '@swc/core': false
   '@parcel/watcher': false
   esbuild: true
   unrs-resolver: false

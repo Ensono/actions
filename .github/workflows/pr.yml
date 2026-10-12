@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: install PNPM 
-        run: npm i -g pnpm@12.6.0
+        run: npm i -g pnpm@12.11.2 --ignore-scripts
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -30,7 +30,7 @@ jobs:
 
       - name: Check Actions integrity
         run: |
-          pnpm i
+          pnpm i --frozen-lockfile --ignore-scripts
           pnpm run build
           git status --porcelain --untracked-files=no
           if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
@@ -40,6 +40,12 @@ jobs:
               exit 1
             fi
           fi
+
+      - name: Correctness lint
+        run: pnpm run lint
+
+      - name: Native source and test type check
+        run: pnpm run typecheck
 
       - name: Run Test
         run: |

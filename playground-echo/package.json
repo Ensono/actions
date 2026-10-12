@@ -6,7 +6,7 @@
   "scripts": {
     "test": "NODE_OPTIONS=--experimental-vm-modules ../node_modules/.bin/jest -c jest.config.js --coverage",
     "test:watch": "NODE_OPTIONS=--experimental-vm-modules ../node_modules/.bin/jest --coverage -c jest.config.js --watchAll",
-    "build": "../node_modules/.bin/tsc --noEmit --skipLibCheck && ../node_modules/.bin/esbuild --bundle ./src/index.ts --outfile=task.js --platform=node --format=cjs",
+    "build": "../node_modules/.bin/tsc --noEmit --skipLibCheck && ../node_modules/.bin/esbuild --bundle ./src/index.ts --outfile=task.js --platform=node --target=node24 --format=cjs",
     "echo": "node index.js"
   },
   "keywords": [],

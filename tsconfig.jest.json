@@ -5,6 +5,21 @@
         "module": "ESNext",
         "moduleResolution": "Bundler",
         "allowImportingTsExtensions": true,
-        "types": ["node", "jest"]
-    }
+        "types": ["node", "jest"],
+        "noEmit": true
+    },
+    "include": [
+        "actions-lib-utils/src/**/*.ts",
+        "eirctl-setup/src/**/*.ts",
+        "playground-echo/src/**/*.ts",
+        "process-json/src/**/*.ts"
+    ],
+    "exclude": [
+        "**/node_modules/**",
+        "**/dist/**",
+        "**/build/**",
+        "**/.coverage/**",
+        "**/coverage/**",
+        "**/task.js"
+    ]
 }

@@ -112,7 +112,7 @@ export const getPrereleaseVersion = async (config: Pick<SetupConfig, "version">)
 
     const preVersion = prereleaseVersions.find((f) => f.tag_name == config.version)
 
-    if (!!preVersion) {
+    if (preVersion) {
         return preVersion.tag_name
     }
     throw new Error(`no prereleases found at version ${config.version}`)

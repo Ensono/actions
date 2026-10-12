@@ -6,6 +6,8 @@
     "build:libs": "pnpm run --sort --filter='@ensono-actions-lib/*' --no-bail build",
     "build": "pnpm run build:libs && pnpm run --sort --filter='@ensono-actions/*' --no-bail build",
     "clean:local": "pnpm store prune && pnpm -r exec -- rm -rf node_modules dist build && rm -rf ./node_modules",
+    "lint": "oxlint --deny-warnings .",
+    "typecheck": "pnpm run build:libs && tsc --noEmit -p actions-lib-utils/tsconfig.json && tsc --noEmit -p eirctl-setup/tsconfig.json && tsc --noEmit -p playground-echo/tsconfig.json && tsc --noEmit -p process-json/tsconfig.json && tsc -p tsconfig.jest.json",
     "test": "pnpm run -r --no-bail --filter='@ensono-actions/*' --filter='@ensono-actions-lib/*' --sort test",
     "test:merge": "istanbul-merge --out .combined-raw.json **/.coverage/coverage-final.json && node output-report.js",
     "view:coverage": "npm run test:merge && open .coverage/index.html"
@@ -13,6 +15,8 @@
   "devDependencies": {
     "@actions/core": "3.0.1",
     "@jest/globals": "30.5.2",
+    "@swc/core": "1.16.13",
+    "@swc/jest": "0.2.39",
     "@types/jest": "30.0.0",
     "@types/node": "~24.13.6",
     "esbuild": "0.28.2",
@@ -23,18 +27,14 @@
     "jest": "30.5.2",
     "jest-junit": "17.0.0",
     "jest-mock": "30.5.2",
-    "ts-jest": "29.4.13",
-    "ts-node": "10.9.2",
-    "typescript": "6.0.3"
+    "oxlint": "1.87.0",
+    "typescript": "7.0.2"
   },
   "keywords": [],
   "author": "EnsonoOrg",
   "license": "MIT",
   "engines": {
-    "pnpm": "12.6.0"
-  },
-  "pnpm": {
-    "overrides": {}
+    "pnpm": "12.11.2"
   },
   "dependencies": {
     "@actions/github": "9.1.1"

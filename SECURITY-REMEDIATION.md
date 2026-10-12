@@ -1,5 +1,48 @@
 # Security remediation record
 
+## TypeScript toolchain migration (2026-10-12 UTC)
+
+The maintainer explicitly requested pnpm 12.11.2 for this change and approved a release-age exception limited to that package-manager version. npm's authoritative registry confirms 12.11.2 is the latest stable release, published 2026-10-09 at 17:35:58.676 UTC, with Node `>=18.*` support (including Node 24). Repository and PR CI pins are aligned on 12.11.2. This does not waive the five-day policy for any other dependency. Host-side installation suppresses lifecycle scripts; dependency execution remains isolated with no network or credentials.
+
+### Migration dependency selection
+
+Authoritative npm registry checks on 2026-10-12 selected exact stable versions:
+
+| Package | Selected | Published (UTC) | Runtime / peers |
+| --- | --- | --- | --- |
+| `typescript` | 7.0.2 | 2026-07-08 15:55 | Node >=16.20.0; native platform packages |
+| `@swc/jest` | 0.2.39 | 2025-07-09 05:43 | npm >=7; `@swc/core: *`; Jest cache-key helper ^30 |
+| `@swc/core` | 1.16.13 | 2026-09-30 09:51 | Node >=10; optional helpers peer >=0.5.17 |
+| `oxlint` | 1.87.0 | 2026-10-05 11:05 | Node ^20.19.0 or >=22.12.0; optional vite-plus/type-aware peers |
+
+All support Node 24 and meet the five-day policy. SWC core's latest 1.16.18 was published less than five days before selection, so 1.16.13 is the newest eligible stable release. No TypeScript compatibility compiler or Oxlint type-aware peer is required. TypeScript, SWC, and Oxlint publish Linux x64 native packages for the CI platform. Only SWC core declares an install lifecycle hook (`node postinstall.js`); installation suppresses that hook pending static review and isolated native-binding verification. No additional compatibility constraint forces an older eligible version.
+
+SWC's reviewed postinstall validates the native binding but can run `npm install` for an untracked WASM fallback if loading fails. On Linux x64/glibc, isolated Node 24 execution loaded its optional native package and transformed TypeScript successfully without that hook. Oxlint 1.87.0 and native TypeScript 7.0.2 also executed successfully after script-suppressed installation. `allowBuilds` explicitly denies SWC's unnecessary hook; no new build-script permission or WASM fallback is required.
+
+### Migration validation and resolved findings
+
+With Node 24.20.0 and pnpm 12.11.2, the migrated toolchain passed build, lint (22 authored files, zero errors/warnings), native production/test checking, all four Jest suites (49 tests, none skipped), and coverage merge. The additional test verifies an error stack's exact original TypeScript line. All four test-file type probes failed with TS2322; source/test lint probes failed with `no-unused-vars`; every probe was restored. JUnit files and merged HTML/Cobertura outputs were verified. No coverage thresholds, diagnostics, or lint rules were suppressed.
+
+A separate clean installation with `--frozen-lockfile --ignore-scripts --config.minimumReleaseAge=7200` left the lockfile hash unchanged and passed the same isolated Node 24 validation. Linux x64/glibc native packages and esbuild worked without lifecycle hooks. Two subsequent builds were byte-identical, and clean-install action/library outputs matched the working tree. Only `eirctl-setup/task.js` changed, reflecting the two behavior-preserving lint fixes. Controlled bundled-action checks passed for plain JSON outputs, Terraform outputs/masking, echo input parsing, and checksum-required rejection before setup download; no network or credentials were available.
+
+**Security remediation (2026-10-12):** initial audit reported moderate [GHSA-hp3w-g68c-fv3c](https://github.com/advisories/GHSA-hp3w-g68c-fv3c) for `sprintf-js` 1.0.3 (vulnerable `<=1.1.3`), reached through Jest's Babel instrumentation → `@istanbuljs/load-nyc-config` 1.1.0 → js-yaml 3 → argparse 1. npm has no patched sprintf-js release. The maintainer approved only the parent-scoped `@istanbuljs/load-nyc-config>js-yaml: 5.4.3` override in `pnpm-workspace.yaml`; this latest stable release was published 2026-10-05 at 22:13:55.389 UTC and meets the age policy. It removes the old argparse/sprintf-js chain. The NYC loader uses only `load()`, which remains exported as CommonJS; isolated loader checks verified valid YAML and invalid-YAML rejection. This deliberately crosses the parent's declared major range, limited to its verified API consumer, not all js-yaml consumers. Full Node 24 build/lint/type-check/tests/coverage passed again; audit then exited zero with zero vulnerabilities. GitHub lists one open npm alert with the same sprintf-js range; semver comparison found zero lockfile matches. The default-branch alert is not claimed closed before merge.
+
+**Workflow validator compatibility:** installed/latest upstream actionlint 1.7.12 rejects the pre-existing `code-quality: write` permission at `.github/workflows/pr.yml:13`. GitHub's official `github/docs` file `data/reusables/actions/github-token-available-permissions.md` confirms `code-quality: read|write|none`. The maintainer approved a temporary compatibility build of actionlint tag v1.7.12, pinned revision `914e7df21a07ef503a81201c76d2b11c789d3fca`, with exactly one addition to `rule_permissions.go`'s `allPermissionScopes` map:
+
+```go
+"code-quality": {"read", "write", "none"},
+```
+
+The pristine source and system binary were untouched; the patch was applied only to a disposable copy. Source entry points, module metadata, permission logic, and external-command paths were statically inspected before the approved build handoff (not a full safety certification). Pinned modules were downloaded on the host; compilation ran offline in Bubblewrap with read-only source/module cache, a writable output directory, `CGO_ENABLED=0`, `GOTOOLCHAIN=local`, `GOPROXY=off`, and `go build -mod=readonly -buildvcs=false -o out/actionlint ./cmd/actionlint`. The local Linux x64 binary SHA-256 is `0a47b645c6a70151c1bb4f0b5be3b61796ee500b00b635c85d2bcfc38d528fe5`. That compatibility binary passed all workflows with ShellCheck enabled. Negative probes confirmed rejection of an unknown permission, `code-quality: admin`, and malformed shell syntax. No permission was removed, validation rule disabled, or diagnostic ignored. **Unmodified upstream actionlint still fails this valid scope**; the compatibility result must not be reported as an unmodified upstream pass. Remove the local compatibility need when upstream recognizes the documented scope.
+
+After remediation, a second clean frozen installation using the exact CI command (`--frozen-lockfile --ignore-scripts`, default age configuration) left the lockfile unchanged and passed bare build/lint/typecheck/test/test:merge commands under Node 24 with strict pre-run verification. Two final rebuilds and the clean build produced identical action/library outputs. Pre-commit npm checks reconfirmed all selected migration dependencies remain the latest eligible stable versions; only pnpm 12.11.2 uses the separately approved age exception.
+
+### Migration baseline
+
+Before compiler/transformer changes, Node 24.20.0 and pnpm 12.11.2 passed `build`, all four Jest suites (48 tests), and `test:merge`; tracked generated outputs remained unchanged. Bubblewrap disabled network and credential access. Build/report destinations were writable; `process-json` additionally required temporary fixture creation in its root, with authored source/configuration and committed fixtures mounted read-only. Initial read-only fixture failures were sandbox setup issues, not source failures.
+
+pnpm 12.11.2 no longer reads the obsolete empty `pnpm.overrides` block, which was removed. Installation with `--ignore-scripts --config.minimumReleaseAge=7200` succeeded without changing the lockfile. Its new pre-run dependency verification also compares release-age configuration, so isolated baseline runs supplied the same one-time flag and `--config.verifyDepsBeforeRun=error` through a temporary launcher. Neither setting was persisted and dependency verification was not disabled.
+
 ## Direct dependency selection (2026-09-29 UTC)
 
 Select the newest stable npm release published at least five days before selection (cutoff: 2026-09-24 09:30 UTC), subject to peer and runtime compatibility. Do not select prereleases. The 7,200-minute pnpm release-age setting was supplied only on the lockfile regeneration command; it is not persisted, so urgent security fixes are not delayed by local package-manager configuration. Dependabot's separate five-day cooldown applies to **version updates only**; security updates are deliberately immediate.

@@ -251,10 +251,8 @@ describe("eirctl setup", () => {
         })
         // Assert
         expect(err).not.toBe(null)
-        if (err != null) {
-            expect(err).toBeInstanceOf(Error)
-            expect((err as Error)?.message.startsWith("unable to fetch prerelease URL")).toBe(true)
-        }
+        expect(err).toBeInstanceOf(Error)
+        expect(err).toHaveProperty("message", expect.stringMatching(/^unable to fetch prerelease URL/))
     })
     test("no prereleases exist", async () => {
         // Arrange
@@ -294,10 +292,8 @@ describe("eirctl setup", () => {
         })
         // Assert
         expect(err).not.toBe(null)
-        if (err != null) {
-            expect(err).toBeInstanceOf(Error)
-            expect((err as Error)?.message).toBe("no prereleases found")
-        }
+        expect(err).toBeInstanceOf(Error)
+        expect(err).toHaveProperty("message", "no prereleases found")
     })
 
     test("no prereleases at version specified", async () => {
@@ -338,10 +334,8 @@ describe("eirctl setup", () => {
         })
         // Assert
         expect(err).not.toBe(null)
-        if (err != null) {
-            expect(err).toBeInstanceOf(Error)
-            expect((err as Error)?.message).toBe("no prereleases found at version 2.7.1")
-        }
+        expect(err).toBeInstanceOf(Error)
+        expect(err).toHaveProperty("message", "no prereleases found at version 2.7.1")
     })
 
     test("download tool fails", async () => {
@@ -359,10 +353,8 @@ describe("eirctl setup", () => {
         })
         // Assert
         expect(err).not.toBe(null)
-        if (err != null) {
-            expect(err).toBeInstanceOf(Error)
-            expect((err as Error)?.message.startsWith("unable to download tool,")).toBe(true)
-        }
+        expect(err).toBeInstanceOf(Error)
+        expect(err).toHaveProperty("message", expect.stringMatching(/^unable to download tool,/))
     })
     test("moving tool fails", async () => {
         // Arrange
@@ -382,10 +374,8 @@ describe("eirctl setup", () => {
         })
         // Assert
         expect(err).not.toBe(null)
-        if (err != null) {
-            expect(err).toBeInstanceOf(Error)
-            expect((err as Error)?.message).toBe("unable to move bin: /some/path/eirctl")
-        }
+        expect(err).toBeInstanceOf(Error)
+        expect(err).toHaveProperty("message", "unable to move bin: /some/path/eirctl")
     })
     test("chmod-ing tool fails", async () => {
         // Arrange
@@ -404,10 +394,8 @@ describe("eirctl setup", () => {
         })
         // Assert
         expect(err).not.toBe(null)
-        if (err != null) {
-            expect(err).toBeInstanceOf(Error)
-            expect((err as Error)?.message).toBe("unable to make executable: /some/path/eirctl")
-        }
+        expect(err).toBeInstanceOf(Error)
+        expect(err).toHaveProperty("message", "unable to make executable: /some/path/eirctl")
     })
     test("runtime fail on missing SHA when version is set to non-latest", async () => {
         // Arrange
@@ -421,10 +409,8 @@ describe("eirctl setup", () => {
         })
         // Assert
         expect(err).not.toBe(null)
-        if (err != null) {
-            expect(err).toBeInstanceOf(Error)
-            expect((err as Error)?.message).toBe('The sha256 input is required when version is not latest.')
-        }
+        expect(err).toBeInstanceOf(Error)
+        expect(err).toHaveProperty("message", 'The sha256 input is required when version is not latest.')
     })
     test.each([
         // version,arc,os,expectUrl
@@ -445,10 +431,8 @@ describe("eirctl setup", () => {
             })
             // Assert
             expect(err).not.toBe(null)
-            if (err != null) {
-                expect(err).toBeInstanceOf(Error)
-                expect((err as Error)?.message).toBe('The sha256 input is required when version is not latest.')
-            }
+            expect(err).toBeInstanceOf(Error)
+            expect(err).toHaveProperty("message", 'The sha256 input is required when version is not latest.')
         })
 
     test.each([
@@ -514,9 +498,7 @@ describe("eirctl setup", () => {
         // Assert
         expect(mockAddPath).not.toHaveBeenCalled()
         expect(err).not.toBe(null)
-            if (err != null) {
-                expect(err).toBeInstanceOf(Error)
-                expect((err as Error)?.message).toBe('checksum verification failed for ' + version)
-            }
+            expect(err).toBeInstanceOf(Error)
+            expect(err).toHaveProperty("message", 'checksum verification failed for ' + version)
     })
 })
