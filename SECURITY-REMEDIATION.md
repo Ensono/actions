@@ -37,6 +37,10 @@ The pristine source and system binary were untouched; the patch was applied only
 
 After remediation, a second clean frozen installation using the exact CI command (`--frozen-lockfile --ignore-scripts`, default age configuration) left the lockfile unchanged and passed bare build/lint/typecheck/test/test:merge commands under Node 24 with strict pre-run verification. Two final rebuilds and the clean build produced identical action/library outputs. Pre-commit npm checks reconfirmed all selected migration dependencies remain the latest eligible stable versions; only pnpm 12.11.2 uses the separately approved age exception.
 
+### Hosted delivery evidence
+
+Replacement [PR #13](https://github.com/Ensono/actions/pull/13) supersedes #11. Its initial hosted [PR workflow run](https://github.com/Ensono/actions/actions/runs/38236556390) passed build/integrity, correctness lint, native source/test checking, all tests and coverage merge, JUnit upload, and coverage upload under Node 24. CodeQL's Actions and JavaScript/TypeScript analyses and the license check also passed. After these checks, the maintainer approved closing #11 with a replacement link; it is closed. The completed capability was synchronized to `openspec/specs/typescript-toolchain/spec.md` and the change archived at `openspec/changes/archive/2026-10-12-upgrade-typescript-7/`. This is pre-merge delivery evidence, not default-branch vulnerability closure.
+
 ### Migration baseline
 
 Before compiler/transformer changes, Node 24.20.0 and pnpm 12.11.2 passed `build`, all four Jest suites (48 tests), and `test:merge`; tracked generated outputs remained unchanged. Bubblewrap disabled network and credential access. Build/report destinations were writable; `process-json` additionally required temporary fixture creation in its root, with authored source/configuration and committed fixtures mounted read-only. Initial read-only fixture failures were sandbox setup issues, not source failures.

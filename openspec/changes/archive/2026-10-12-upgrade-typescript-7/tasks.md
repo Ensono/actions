@@ -48,7 +48,7 @@
 ## 7. Deliver the replacement PR
 
 - [x] 7.1 Validate the OpenSpec change and assess sync/archive timing before PR creation; retain the active change while required delivery tasks remain incomplete, or define a follow-up change if scope is split.
-- [ ] 7.2 Run configured pre-commit checks if present, requesting hook installation where applicable; commit the scoped changes with signing intact and push `chore/upgrade-typescript-7` without force-pushing unrelated branches.
-- [ ] 7.3 Verify the intended GitHub host/account and open a replacement PR against `main` only after implementation and local validation; explicitly state that it supersedes #11 and include the contributing cause, selected architecture, lint/type-check/test evidence, and included Oxlint hardening scope.
-- [ ] 7.4 Inspect the replacement PR's checks and resolve migration-related failures; coordinate disposition of PR #11 after the replacement exists, rather than closing it during planning.
-- [ ] 7.5 Synchronize the completed delta specification and archive the genuinely completed change using the relevant OpenSpec workflows, ensuring the final delivery includes those artifacts without representing incomplete tasks as finished.
+- [x] 7.2 Run configured pre-commit checks if present, requesting hook installation where applicable; commit the scoped changes with signing intact and push `chore/upgrade-typescript-7` without force-pushing unrelated branches.
+- [x] 7.3 Verify the intended GitHub host/account and open a replacement PR against `main` only after implementation and local validation; explicitly state that it supersedes #11 and include the contributing cause, selected architecture, lint/type-check/test evidence, and included Oxlint hardening scope.
+- [x] 7.4 Inspect the replacement PR's checks and resolve migration-related failures; coordinate disposition of PR #11 after the replacement exists, rather than closing it during planning.
+- [x] 7.5 Synchronize the completed delta specification and archive the genuinely completed change using the relevant OpenSpec workflows, ensuring the final delivery includes those artifacts without representing incomplete tasks as finished.
