@@ -14,7 +14,7 @@
     "@actions/core": "3.0.1",
     "@jest/globals": "30.5.2",
     "@types/jest": "30.0.0",
-    "@types/node": "~24.13.6",
+    "@types/node": "~26.6.4",
     "esbuild": "0.28.2",
     "istanbul-lib-coverage": "3.2.2",
     "istanbul-lib-report": "3.0.1",
@@ -23,9 +23,9 @@
     "jest": "30.5.2",
     "jest-junit": "17.0.0",
     "jest-mock": "30.5.2",
-    "ts-jest": "29.4.13",
+    "ts-jest": "29.4.14",
     "ts-node": "10.9.2",
-    "typescript": "6.0.3"
+    "typescript": "7.0.2"
   },
   "keywords": [],
   "author": "EnsonoOrg",
