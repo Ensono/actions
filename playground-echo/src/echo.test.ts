@@ -25,7 +25,7 @@ jest.unstable_mockModule("@actions/core", () => ({
 
 
 // import { parseConfig } from './echo'
-const { parseConfig, runTask } = await import("./echo.ts")
+const { runTask } = await import("./echo.ts")
 
 describe('Echo tests', () => {
     beforeEach(() => {
@@ -67,7 +67,6 @@ describe('Echo tests', () => {
         mockGetInput.mockImplementationOnce(() => { throw new Error('Input does not meet YAML 1.2 "Core Schema" specification') })
         mockGetBooleanInput.mockReturnValueOnce(false)
         mockgetMultilineInput.mockReturnValueOnce([])
-        let err = null
         // Act
         runTask()
 

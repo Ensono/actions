@@ -19,31 +19,39 @@ __Components__:
 - [pnpm](https://pnpm.io/)
     - using workspaces also allows for easy lib sharing across different tasks - coupled with a bundler
     - workspace level dependency lock-file
-- Typescript 5.x
+- Native TypeScript 7 for compilation and source-and-test type checking
+- SWC for TypeScript-to-ESM Jest transformation (it does **not** type-check)
+- Oxlint for correctness-focused linting, included as hardening in this change
 
 ### Install
 
-In the root run the below:
-
-- `npm install -g pnpm@9.1.0`
-
-Once we have these 2 installed we can use pnpm for everything, see the [pnpm-workspace.yaml](./pnpm-workspace.yaml) for details on how the workspace lookups are organised.
+Use Node 24 and the repository/CI-pinned pnpm version:
 
 ```sh
-pnpm i
+npm install -g pnpm@12.11.2 --ignore-scripts
+pnpm install --frozen-lockfile --ignore-scripts
 ```
 
-To run the tests in all the tasks
+See [pnpm-workspace.yaml](./pnpm-workspace.yaml) for workspace discovery and the reviewed dependency-build policy. Native SWC and Oxlint packages work without install hooks on the verified Linux x64/glibc platform. SWC's network-capable WASM fallback hook is deliberately denied; other platforms must provide a supported native optional package rather than enabling scripts globally. The pnpm-only release-age exception, parent-scoped coverage-tooling YAML security override, and temporary actionlint compatibility-build evidence are recorded in [SECURITY-REMEDIATION.md](./SECURITY-REMEDIATION.md).
 
-```sh
-pnpm run test
-```
+### Local verification
 
-To run the build of all the tasks
+Run the following sequence under Node 24, with builds, linters, and tests isolated from credentials and network access:
 
 ```sh
 pnpm run build
+pnpm run lint
+pnpm run typecheck
+pnpm run test
+pnpm run test:merge
 ```
+
+- **TypeScript 7** is the authoritative native compiler/checker. `typecheck` explicitly builds shared-library declarations first, checks all four production configurations without emitting, then checks their source and tests through `tsconfig.jest.json`. Test exclusions are overridden; generated artifacts are not additional source roots (library declarations are consumed as package types).
+- **SWC** strips/transforms TypeScript into ESM for **Jest 30**, which executes tests with VM modules, dynamic-import mocks, existing coverage thresholds, and JUnit reporting. Successful transformation is not a type check.
+- **Oxlint** enforces standard correctness rules, including Jest correctness checks, and fails on any error or warning. It does not replace native compiler checking, enable type-aware linting, or perform a formatting migration. `lint` covers authored TypeScript/JavaScript throughout the repository: all workspace source/tests, `.tests/inputs.ts`, Jest configurations, `.testEnv.js` helpers, and `output-report.js`. Node globals are available; Jest globals are scoped to tests/helpers. Generated `task.js`, `dist`/`build` outputs, dependencies, and coverage directories are explicitly excluded. No rule exceptions are required for the current baseline.
+- **esbuild** produces each action's CommonJS bundle with explicit `--target=node24`. Consumers run the committed JavaScript with `using: node24`, not the compiler. Commit reproducible bundle/declaration changes whenever a build changes tracked outputs.
+
+When changing dependencies, query npm for compatible stable versions at least five days old and supply `--config.minimumReleaseAge=7200` only on the install/update command; never persist the delay. pnpm 12.11.2's pre-run verification compares this setting with the installation. If that install used the flag, pass the same one-time flag on subsequent validation commands (for example `pnpm --config.minimumReleaseAge=7200 run typecheck`), or perform a normal frozen installation as above. Do not disable dependency verification. Isolated runners may use `--config.verifyDepsBeforeRun=error` to prevent automatic host-style installation attempts.
 
 ### Notes
 

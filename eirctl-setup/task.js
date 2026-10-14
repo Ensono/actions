@@ -22600,7 +22600,7 @@ var getPrereleaseVersion = async (config) => {
     return prereleaseVersions[0].tag_name;
   }
   const preVersion = prereleaseVersions.find((f) => f.tag_name == config.version);
-  if (!!preVersion) {
+  if (preVersion) {
     return preVersion.tag_name;
   }
   throw new Error(`no prereleases found at version ${config.version}`);
@@ -22646,7 +22646,7 @@ var runAction = async () => {
 };
 
 // src/index.ts
-(async () => await runAction().then((d) => debug(`eirctl downloaded and ready to use`)).catch((ex) => setFailed(ex?.message)))();
+(async () => await runAction().then(() => debug(`eirctl downloaded and ready to use`)).catch((ex) => setFailed(ex?.message)))();
 /*! Bundled license information:
 
 undici/lib/web/fetch/body.js:

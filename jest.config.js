@@ -3,14 +3,17 @@ module.exports = {
   testMatch: ["**/*.test.ts"],
   testEnvironment: "node",
   moduleFileExtensions: ["ts", "js", "json"],
-  preset: "ts-jest/presets/default-esm",
   extensionsToTreatAsEsm: [".ts"],
   transform: {
     "^.+\\.ts$": [
-      "ts-jest",
+      "@swc/jest",
       {
-        useESM: true,
-        tsconfig: "../tsconfig.jest.json"
+        jsc: {
+          parser: { syntax: "typescript" },
+          target: "es2023"
+        },
+        module: { type: "es6" },
+        sourceMaps: true
       }
     ]
   },
